@@ -20,7 +20,7 @@ const {isUndefined, forEach, CustomEvents} = snippet;
 /**
  * Image editor
  * @class
- * @param {string|jQuery|HTMLElement} wrapper - Wrapper's element or selector
+ * @param {string|HTMLElement} wrapper - Wrapper's element or selector
  * @param {Object} [options] - Canvas max width & height of css
  *  @param {number} [options.includeUI] - Use the provided UI
  *    @param {Object} [options.includeUI.loadImage] - Basic editing image
@@ -29,9 +29,21 @@ const {isUndefined, forEach, CustomEvents} = snippet;
  *    @param {Object} [options.includeUI.theme] - Theme object
  *    @param {Array} [options.includeUI.menu] - It can be selected when only specific menu is used. [default all]
  *    @param {string} [options.includeUI.initMenu] - The first menu to be selected and started.
+ *    @param {Object} [options.includeUI.uiSize] - ui size of editor
+ *      @param {string} options.includeUI.uiSize.width - width of ui
+ *      @param {string} options.includeUI.uiSize.height - height of ui
  *    @param {string} [options.includeUI.menuBarPosition=bottom] - Menu bar position [top | bottom | left | right]
  *  @param {number} options.cssMaxWidth - Canvas css-max-width
  *  @param {number} options.cssMaxHeight - Canvas css-max-height
+ *  @param {Object} [options.selectionStyle] - selection style
+ *  @param {string} [options.selectionStyle.cornerStyle] - selection corner style
+ *  @param {number} [options.selectionStyle.cornerSize] - selection corner size
+ *  @param {string} [options.selectionStyle.cornerColor] - selection corner color
+ *  @param {string} [options.selectionStyle.cornerStrokeColor] = selection corner stroke color
+ *  @param {boolean} [options.selectionStyle.transparentCorners] - selection corner transparent
+ *  @param {number} [options.selectionStyle.lineWidth] - selection line width
+ *  @param {string} [options.selectionStyle.borderColor] - selection border color
+ *  @param {number} [options.selectionStyle.rotatingPointOffset] - selection rotating point length
  *  @param {Boolean} [options.usageStatistics=true] - Let us know the hostname. If you don't want to send the hostname, please set to false.
  * @example
  * var ImageEditor = require('tui-image-editor');
@@ -45,6 +57,10 @@ const {isUndefined, forEach, CustomEvents} = snippet;
  *     theme: blackTheme, // or whiteTheme
  *     menu: ['shape', 'filter'],
  *     initMenu: 'filter',
+ *     uiSize: {
+ *         width: '1000px',
+ *         height: '700px'
+ *     },
  *     menuBarPosition: 'bottom'
  *   },
  *   cssMaxWidth: 700,
@@ -175,13 +191,13 @@ class ImageEditor {
      * @property {number} id - object id
      * @property {string} type - object type
      * @property {string} text - text content
-     * @property {string} left - Left
-     * @property {string} top - Top
-     * @property {string} width - Width
-     * @property {string} height - Height
+     * @property {(string | number)} left - Left
+     * @property {(string | number)} top - Top
+     * @property {(string | number)} width - Width
+     * @property {(string | number)} height - Height
      * @property {string} fill - Color
      * @property {string} stroke - Stroke
-     * @property {string} strokeWidth - StrokeWidth
+     * @property {(string | number)} strokeWidth - StrokeWidth
      * @property {string} fontFamily - Font type for text
      * @property {number} fontSize - Font Size
      * @property {string} fontStyle - Type of inclination (normal / italic)
@@ -295,6 +311,10 @@ class ImageEditor {
      */
     /* eslint-disable complexity */
     _onKeyDown(e) {
+        const activeObject = this._graphics.getActiveObject();
+        const activeObjectGroup = this._graphics.getActiveGroupObject();
+        const existRemoveObject = activeObject || activeObjectGroup;
+
         if ((e.ctrlKey || e.metaKey) && e.keyCode === keyCodes.Z) {
             // There is no error message on shortcut when it's empty
             this.undo()['catch'](() => {});
@@ -305,7 +325,7 @@ class ImageEditor {
             this.redo()['catch'](() => {});
         }
 
-        if ((e.keyCode === keyCodes.BACKSPACE || e.keyCode === keyCodes.DEL)) {
+        if (((e.keyCode === keyCodes.BACKSPACE || e.keyCode === keyCodes.DEL) && existRemoveObject)) {
             e.preventDefault();
             this.removeActiveObject();
         }
@@ -656,6 +676,14 @@ class ImageEditor {
     }
 
     /**
+     * Set the cropping rect
+     * @param {number} [mode] crop rect mode [1, 1.5, 1.3333333333333333, 1.25, 1.7777777777777777]
+     */
+    setCropzoneRect(mode) {
+        this._graphics.setCropzoneRect(mode);
+    }
+
+    /**
      * Flip
      * @returns {Promise}
      * @param {string} type - 'flipX' or 'flipY' or 'reset'
@@ -840,7 +868,7 @@ class ImageEditor {
      *      @param {number} [options.ry] - Radius y value (When type option is 'circle', this options can use)
      *      @param {number} [options.left] - Shape x position
      *      @param {number} [options.top] - Shape y position
-     *      @param {number} [options.isRegular] - Whether resizing shape has 1:1 ratio or not
+     *      @param {boolean} [options.isRegular] - Whether resizing shape has 1:1 ratio or not
      * @returns {Promise<ObjectProps, ErrorMsg>}
      * @example
      * imageEditor.addShape('rect', {
@@ -884,7 +912,7 @@ class ImageEditor {
      *      @param {number} [options.height] - Height value (When type option is 'rect', this options can use)
      *      @param {number} [options.rx] - Radius x value (When type option is 'circle', this options can use)
      *      @param {number} [options.ry] - Radius y value (When type option is 'circle', this options can use)
-     *      @param {number} [options.isRegular] - Whether resizing shape has 1:1 ratio or not
+     *      @param {boolean} [options.isRegular] - Whether resizing shape has 1:1 ratio or not
      * @returns {Promise}
      * @example
      * // call after selecting shape object on canvas
@@ -929,7 +957,7 @@ class ImageEditor {
      * imageEditor.addText('init text', {
      *     styles: {
      *         fill: '#000',
-     *         fontSize: '20',
+     *         fontSize: 20,
      *         fontWeight: 'bold'
      *     },
      *     position: {
@@ -1135,8 +1163,8 @@ class ImageEditor {
      * @param {string} type - Icon type ('arrow', 'cancel', custom icon name)
      * @param {Object} options - Icon options
      *      @param {string} [options.fill] - Icon foreground color
-     *      @param {string} [options.left] - Icon x position
-     *      @param {string} [options.top] - Icon y position
+     *      @param {number} [options.left] - Icon x position
+     *      @param {number} [options.top] - Icon y position
      * @returns {Promise<ObjectProps, ErrorMsg>}
      * @example
      * imageEditor.addIcon('arrow'); // The position is center on canvas
@@ -1226,7 +1254,14 @@ class ImageEditor {
 
     /**
      * Get data url
-     * @param {string} type - A DOMString indicating the image format. The default type is image/png.
+     * @param {Object} options - options for toDataURL
+     *   @param {String} [options.format=png] The format of the output image. Either "jpeg" or "png"
+     *   @param {Number} [options.quality=1] Quality level (0..1). Only used for jpeg.
+     *   @param {Number} [options.multiplier=1] Multiplier to scale by
+     *   @param {Number} [options.left] Cropping left offset. Introduced in fabric v1.2.14
+     *   @param {Number} [options.top] Cropping top offset. Introduced in fabric v1.2.14
+     *   @param {Number} [options.width] Cropping width. Introduced in fabric v1.2.14
+     *   @param {Number} [options.height] Cropping height. Introduced in fabric v1.2.14
      * @returns {string} A DOMString containing the requested data URI
      * @example
      * imgEl.src = imageEditor.toDataURL();
@@ -1235,8 +1270,8 @@ class ImageEditor {
      *      imageEditor.addImageObject(imgUrl);
      * });
      */
-    toDataURL(type) {
-        return this._graphics.toDataURL(type);
+    toDataURL(options) {
+        return this._graphics.toDataURL(options);
     }
 
     /**

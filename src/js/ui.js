@@ -13,6 +13,7 @@ import Mask from './ui/mask';
 import Icon from './ui/icon';
 import Draw from './ui/draw';
 import Filter from './ui/filter';
+import Locale from './ui/locale/locale';
 
 const SUB_UI_COMPONENT = {
     Shape,
@@ -31,23 +32,25 @@ const BI_EXPRESSION_MINSIZE_WHEN_TOP_POSITION = '1300';
 /**
  * Ui class
  * @class
- * @param {string|jQuery|HTMLElement} element - Wrapper's element or selector
+ * @param {string|HTMLElement} element - Wrapper's element or selector
  * @param {Object} [options] - Ui setting options
  *   @param {number} option.loadImage - Init default load image
  *   @param {number} option.initMenu - Init start menu
  *   @param {Boolean} [option.menuBarPosition=bottom] - Let
  *   @param {Boolean} [option.applyCropSelectionStyle=false] - Let
+ *   @param {Object} [options.uiSize] - ui size of editor
+ *     @param {string} options.uiSize.width - width of ui
+ *     @param {string} options.uiSize.height - height of ui
  * @param {Objecdt} actions - ui action instance
- * @ignore
  */
 class Ui {
     constructor(element, options, actions) {
         this.options = this._initializeOption(options);
-
         this._actions = actions;
         this.submenu = false;
         this.imageSize = {};
         this.uiSize = {};
+        this._locale = new Locale(this.options.locale);
         this.theme = new Theme(this.options.theme);
 
         this._submenuChangeTransection = false;
@@ -59,6 +62,7 @@ class Ui {
         this._subMenuElement = null;
         this._makeUiElement(element);
         this._setUiSize();
+        this._initMenuEvent = false;
 
         this._els = {
             'undo': this._menuElement.querySelector('#tie-btn-undo'),
@@ -77,6 +81,7 @@ class Ui {
      * Set Default Selection for includeUI
      * @param {Object} option - imageEditor options
      * @returns {Object} - extends selectionStyle option
+     * @ignore
      */
     setUiDefaultSelectionStyle(option) {
         return snippet.extend({
@@ -84,9 +89,9 @@ class Ui {
             applyGroupSelectionStyle: true,
             selectionStyle: {
                 cornerStyle: 'circle',
-                cornerSize: 20,
+                cornerSize: 16,
                 cornerColor: '#fff',
-                cornerStrokeColor: '#000',
+                cornerStrokeColor: '#fff',
                 transparentCorners: false,
                 lineWidth: 2,
                 borderColor: '#fff'
@@ -105,6 +110,15 @@ class Ui {
      *     @param {Number} resizeInfo.imageSize.oldHeight - old height
      *     @param {Number} resizeInfo.imageSize.newWidth - new width
      *     @param {Number} resizeInfo.imageSize.newHeight - new height
+     * @example
+     * // Change the image size and ui size, and change the affected ui state together.
+     * imageEditor.ui.resizeEditor({
+     *     imageSize: {oldWidth: 100, oldHeight: 100, newWidth: 700, newHeight: 700},
+     *     uiSize: {width: 1000, height: 1000}
+     * });
+     * @example
+     * // Apply the ui state while preserving the previous attribute (for example, if responsive Ui)
+     * imageEditor.ui.resizeEditor();
      */
     resizeEditor({uiSize, imageSize = this.imageSize} = {}) {
         if (imageSize !== this.imageSize) {
@@ -113,6 +127,7 @@ class Ui {
         if (uiSize) {
             this._setUiSize(uiSize);
         }
+
         const {width, height} = this._getEditorDimension();
         const editorElementStyle = this._editorElement.style;
         const {menuBarPosition} = this.options;
@@ -120,12 +135,13 @@ class Ui {
         editorElementStyle.height = `${height}px`;
         editorElementStyle.width = `${width}px`;
 
-        const {top, bottom, left, right} = this._getEditorPosition(menuBarPosition);
+        this._setEditorPosition(menuBarPosition);
 
-        this._editorElementWrap.style.bottom = `${bottom}px`;
-        this._editorElementWrap.style.top = `${top}px`;
-        this._editorElementWrap.style.left = `${left}px`;
-        this._editorElementWrap.style.width = `calc(100% - ${right}px)`;
+        this._editorElementWrap.style.bottom = `0px`;
+        this._editorElementWrap.style.top = `0px`;
+        this._editorElementWrap.style.left = `0px`;
+        this._editorElementWrap.style.width = `100%`;
+
         const selectElementClassList = this._selectedElement.classList;
 
         if (menuBarPosition === 'top' && this._selectedElement.offsetWidth < BI_EXPRESSION_MINSIZE_WHEN_TOP_POSITION) {
@@ -138,6 +154,7 @@ class Ui {
     /**
      * Change undo button status
      * @param {Boolean} enableStatus - enabled status
+     * @ignore
      */
     changeUndoButtonStatus(enableStatus) {
         if (enableStatus) {
@@ -150,6 +167,7 @@ class Ui {
     /**
      * Change redo button status
      * @param {Boolean} enableStatus - enabled status
+     * @ignore
      */
     changeRedoButtonStatus(enableStatus) {
         if (enableStatus) {
@@ -162,6 +180,7 @@ class Ui {
     /**
      * Change reset button status
      * @param {Boolean} enableStatus - enabled status
+     * @ignore
      */
     changeResetButtonStatus(enableStatus) {
         if (enableStatus) {
@@ -174,6 +193,7 @@ class Ui {
     /**
      * Change delete-all button status
      * @param {Boolean} enableStatus - enabled status
+     * @ignore
      */
     changeDeleteAllButtonEnabled(enableStatus) {
         if (enableStatus) {
@@ -186,6 +206,7 @@ class Ui {
     /**
      * Change delete button status
      * @param {Boolean} enableStatus - enabled status
+     * @ignore
      */
     changeDeleteButtonEnabled(enableStatus) {
         if (enableStatus) {
@@ -198,10 +219,10 @@ class Ui {
     /**
      * Change delete button status
      * @param {Object} [options] - Ui setting options
-     *   @param {number} option.loadImage - Init default load image
-     *   @param {number} option.initMenu - Init start menu
-     *   @param {Boolean} [option.menuBarPosition=bottom] - Let
-     *   @param {Boolean} [option.applyCropSelectionStyle=false] - Let
+     *   @param {object} [option.loadImage] - Init default load image
+     *   @param {string} [option.initMenu] - Init start menu
+     *   @param {string} [option.menuBarPosition=bottom] - Let
+     *   @param {boolean} [option.applyCropSelectionStyle=false] - Let
      * @returns {Object} initialize option
      * @private
      */
@@ -211,9 +232,10 @@ class Ui {
                 path: '',
                 name: ''
             },
+            locale: {},
             menuIconPath: '',
             menu: ['crop', 'flip', 'rotate', 'draw', 'shape', 'icon', 'text', 'mask', 'filter'],
-            initMenu: false,
+            initMenu: '',
             uiSize: {
                 width: '100%',
                 height: '100%'
@@ -251,6 +273,7 @@ class Ui {
 
             // submenu ui instance
             this[menuName] = new SubComponentClass(this._subMenuElement, {
+                locale: this._locale,
                 iconStyle: this.theme.getStyle('submenu.icon'),
                 menuBarPosition: this.options.menuBarPosition
             });
@@ -259,7 +282,7 @@ class Ui {
 
     /**
      * Make primary ui dom element
-     * @param {string|jQuery|HTMLElement} element - Wrapper's element or selector
+     * @param {string|HTMLElement} element - Wrapper's element or selector
      * @private
      */
     _makeUiElement(element) {
@@ -267,9 +290,7 @@ class Ui {
 
         window.snippet = snippet;
 
-        if (element.jquery) {
-            [selectedElement] = element;
-        } else if (element.nodeType) {
+        if (element.nodeType) {
             selectedElement = element;
         } else {
             selectedElement = document.querySelector(element);
@@ -278,12 +299,14 @@ class Ui {
 
         selectedElement.classList.add('tui-image-editor-container');
         selectedElement.innerHTML = controls({
+            locale: this._locale,
             biImage: this.theme.getStyle('common.bi'),
             iconStyle: this.theme.getStyle('menu.icon'),
             loadButtonStyle: this.theme.getStyle('loadButton'),
             downloadButtonStyle: this.theme.getStyle('downloadButton')
         }) +
         mainContainer({
+            locale: this._locale,
             biImage: this.theme.getStyle('common.bi'),
             commonStyle: this.theme.getStyle('common'),
             headerStyle: this.theme.getStyle('header'),
@@ -309,17 +332,18 @@ class Ui {
      */
     _makeMenuElement(menuName) {
         const btnElement = document.createElement('li');
-        const {normal, active} = this.theme.getStyle('menu.icon');
+        const {normal, active, hover} = this.theme.getStyle('menu.icon');
         const menuItemHtml = `
             <svg class="svg_ic-menu">
                 <use xlink:href="${normal.path}#${normal.name}-ic-${menuName}" class="normal"/>
                 <use xlink:href="${active.path}#${active.name}-ic-${menuName}" class="active"/>
+                <use xlink:href="${hover.path}#${hover.name}-ic-${menuName}" class="hover"/>
             </svg>
         `;
 
         btnElement.id = `tie-btn-${menuName}`;
-        btnElement.className = 'tui-image-editor-item';
-        btnElement.title = menuName;
+        btnElement.className = 'tui-image-editor-item normal';
+        btnElement.title = this._locale.localize(menuName.replace(/^[a-z]/g, $0 => $0.toUpperCase()));
         btnElement.innerHTML = menuItemHtml;
 
         this._menuElement.appendChild(btnElement);
@@ -383,34 +407,50 @@ class Ui {
     /**
      * get editor area element
      * @returns {HTMLElement} editor area html element
+     * @ignore
      */
     getEditorArea() {
         return this._editorElement;
     }
 
     /**
+     * Add event for menu items
+     * @ignore
+     */
+    activeMenuEvent() {
+        if (this._initMenuEvent) {
+            return;
+        }
+
+        this._addHelpActionEvent('undo');
+        this._addHelpActionEvent('redo');
+        this._addHelpActionEvent('reset');
+        this._addHelpActionEvent('delete');
+        this._addHelpActionEvent('deleteAll');
+
+        this._addDownloadEvent();
+
+        snippet.forEach(this.options.menu, menuName => {
+            this._addMenuEvent(menuName);
+            this._addSubMenuEvent(menuName);
+        });
+        this._initMenu();
+        this._initMenuEvent = true;
+    }
+
+    /**
      * Init canvas
+     * @ignore
      */
     initCanvas() {
         const loadImageInfo = this._getLoadImage();
-        if (loadImageInfo) {
+        if (loadImageInfo.path) {
             this._actions.main.initLoadImage(loadImageInfo.path, loadImageInfo.name).then(() => {
-                this._addHelpActionEvent('undo');
-                this._addHelpActionEvent('redo');
-                this._addHelpActionEvent('reset');
-                this._addHelpActionEvent('delete');
-                this._addHelpActionEvent('deleteAll');
-
-                this._addDownloadEvent();
-                this._addLoadEvent();
-
-                snippet.forEach(this.options.menu, menuName => {
-                    this._addMenuEvent(menuName);
-                    this._addSubMenuEvent(menuName);
-                });
-                this._initMenu();
+                this.activeMenuEvent();
             });
         }
+
+        this._addLoadEvent();
 
         const gridVisual = document.createElement('div');
         gridVisual.className = 'tui-image-editor-grid-visual';
@@ -426,7 +466,7 @@ class Ui {
 
     /**
      * get editor area element
-     * @returns {Object} loadimage optionk
+     * @returns {Object} load image option
      * @private
      */
     _getLoadImage() {
@@ -438,6 +478,7 @@ class Ui {
      * @param {string} menuName - menu name
      * @param {boolean} toggle - whether toogle or not
      * @param {boolean} discardSelection - discard selection
+     * @ignore
      */
     changeMenu(menuName, toggle = true, discardSelection = true) {
         if (!this._submenuChangeTransection) {
@@ -486,9 +527,10 @@ class Ui {
             const evt = document.createEvent('MouseEvents');
             evt.initEvent('click', true, false);
             this._els[this.options.initMenu].dispatchEvent(evt);
-            if (this.icon) {
-                this.icon.registDefaultIcon();
-            }
+        }
+
+        if (this.icon) {
+            this.icon.registDefaultIcon();
         }
     }
 
@@ -511,43 +553,45 @@ class Ui {
     }
 
     /**
-     * Get editor position
+     * Set editor position
      * @param {string} menuBarPosition - top or right or bottom or left
-     * @returns {Object} - positions (top, right, bottom, left)
      * @private
      */
-    _getEditorPosition(menuBarPosition) {
-        let bottom = 0;
+    _setEditorPosition(menuBarPosition) {
+        const {width, height} = this._getEditorDimension();
+        const editorElementStyle = this._editorElement.style;
         let top = 0;
         let left = 0;
-        let right = 0;
 
         if (this.submenu) {
-            switch (menuBarPosition) {
-                case 'bottom':
-                    bottom += 150;
-                    break;
-                case 'top':
-                    top += 150;
-                    break;
-                case 'left':
-                    left += 248;
-                    right += 248;
-                    break;
-                case 'right':
-                    right += 248;
-                    break;
-                default:
-                    break;
+            if (menuBarPosition === 'bottom') {
+                if (height > this._editorElementWrap.scrollHeight - 150) {
+                    top = (height - this._editorElementWrap.scrollHeight) / 2;
+                } else {
+                    top = (150 / 2) * -1;
+                }
+            } else if (menuBarPosition === 'top') {
+                if (height > this._editorElementWrap.offsetHeight - 150) {
+                    top = (150 / 2) - ((height - (this._editorElementWrap.offsetHeight - 150)) / 2);
+                } else {
+                    top = 150 / 2;
+                }
+            } else if (menuBarPosition === 'left') {
+                if (width > this._editorElementWrap.offsetWidth - 248) {
+                    left = (248 / 2) - ((width - (this._editorElementWrap.offsetWidth - 248)) / 2);
+                } else {
+                    left = 248 / 2;
+                }
+            } else if (menuBarPosition === 'right') {
+                if (width > this._editorElementWrap.scrollWidth - 248) {
+                    left = (width - this._editorElementWrap.scrollWidth) / 2;
+                } else {
+                    left = (248 / 2) * -1;
+                }
             }
         }
-
-        return {
-            top,
-            bottom,
-            left,
-            right
-        };
+        editorElementStyle.top = `${top}px`;
+        editorElementStyle.left = `${left}px`;
     }
 }
 

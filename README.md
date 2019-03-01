@@ -1,13 +1,16 @@
 # ![Toast UI ImageEditor](https://user-images.githubusercontent.com/35218826/40895380-0b9f4cd6-67ea-11e8-982f-18121daa3a04.png)
-> Full-featured photo image editor with use canvas, easy to apply, and great filter function
-Full-featured photo image editor using canvas. It is really easy, and it comes with great filters.
+> Full featured image editor using HTML5 Canvas. It's easy to use and provides powerful filters.
 
 
 [![github version](https://img.shields.io/github/release/nhnent/tui.image-editor.svg)](https://github.com/nhnent/tui.image-editor/releases/latest) [![npm version](https://img.shields.io/npm/v/tui-image-editor.svg)](https://www.npmjs.com/package/tui-image-editor) [![bower version](https://img.shields.io/bower/v/tui.image-editor.svg)](https://github.com/nhnent/tui.image-editor/releases/latest) [![license](https://img.shields.io/github/license/nhnent/tui.image-editor.svg)](https://github.com/nhnent/tui.image-editor/blob/master/LICENSE) [![PRs welcome](https://img.shields.io/badge/PRs-welcome-ff69b4.svg)](https://github.com/nhnent/tui.image-editor/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22)[![code with hearth by NHN Entertainment](https://img.shields.io/badge/%3C%2F%3E%20with%20%E2%99%A5%20by-NHN%20Entertainment-ff1414.svg)](https://github.com/nhnent)
 
+## Wrappers
+- [toast-ui.vue-image-editor](https://github.com/nhnent/toast-ui.vue-image-editor): Vue wrapper component is powered by [NHN Entertainment](https://github.com/nhnent).
+
 ![6 -20-2018 17-45-54](https://user-images.githubusercontent.com/35218826/41647896-7b218ae0-74b2-11e8-90db-d7805cc23e8c.gif)
 
 ## 🚩 Table of Contents
+* [Collect statistics on the use of open source](#Collect-statistics-on-the-use-of-open-source)
 * [Browser Support](#-browser-support)
 * [Has full features that stick to the basic.](#-has-full-features-that-stick-to-the-basic)
     * [Photo manipulation](#photo-manipulation)
@@ -25,15 +28,35 @@ Full-featured photo image editor using canvas. It is really easy, and it comes w
 * [Usage](#-usage)
   * [HTML](#html)
   * [JavaScript](#javascript)
-* [Development](#develop)
+* [Development](#-development)
   * [Setup](#setup)
   * [Run webpack-dev-server](#run-webpack-dev-server)
 * [Documents](#-documents)
 * [Contributing](#-contributing)
 * [Dependency](#-dependency)
 * [TOAST UI Family](#-toast-ui-family)
+* [Used By](#-used-by)
 * [License](#-license)
 
+
+## Collect statistics on the use of open source
+
+TOAST UI ImageEditor applies Google Analytics (GA) to collect statistics on the use of open source, in order to identify how widely TOAST UI ImageEditor is used throughout the world. It also serves as important index to determine the future course of projects. location.hostname (e.g. > “ui.toast.com") is to be collected and the sole purpose is nothing but to measure statistics on the usage. To disable GA, use the following `usageStatistics` option when creating the instance.
+
+```js
+var options = {
+    ...
+    usageStatistics: false
+}
+
+var imageEditor = new tui.ImageEditor('#tui-image-editor-container', options);
+```
+
+Or, include [`tui-code-snippet`](https://github.com/nhnent/tui.code-snippet)(**v1.4.0** or **later**) and then immediately write the options as follows:
+
+```js
+tui.usageStatistics = false;
+```
 
 
 ## 🌏 Browser Support
@@ -224,12 +247,18 @@ Add dependencies & initialize ImageEditor class with given element to make an im
 ```javascript
 var ImageEditor = require('tui-image-editor');
 var blackTheme = require('./js/theme/black-theme.js');
+var locale_ru_RU = { // override default English locale to your custom
+    'Crop': 'Обзрезать',
+    'Delete-all': 'Удалить всё'
+    // etc...
+};
 var instance = new ImageEditor(document.querySelector('#tui-image-editor'), {
      includeUI: {
          loadImage: {
              path: 'img/sampleImage.jpg',
              name: 'SampleImage'
          },
+         locale: locale_ru_RU,
          theme: blackTheme, // or whiteTheme
          initMenu: 'filter',
          menuBarPosition: 'bottom'
@@ -308,6 +337,9 @@ $ npm run serve
 * [TOAST UI Chart](https://github.com/nhnent/tui.chart)
 * [TOAST UI Calendar](https://github.com/nhnent/tui.calendar)
 * [TOAST UI Components](https://github.com/nhnent)
+
+## 🚀 Used By
+* [TOAST Dooray! - Collaboration Service (Project, Messenger, Mail, Calendar, Drive, Wiki, Contacts)](https://dooray.com/home/)
 
 ## 📜 License
 [MIT LICENSE](https://github.com/nhnent/tui.image-editor/blob/master/LICENSE)

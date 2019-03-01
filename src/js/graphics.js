@@ -42,7 +42,7 @@ const backstoreOnly = {
 /**
  * Graphics class
  * @class
- * @param {string|jQuery|HTMLElement} wrapper - Wrapper's element or selector
+ * @param {string|HTMLElement} wrapper - Wrapper's element or selector
  * @param {Object} [option] - Canvas max width & height of css
  *  @param {number} option.cssMaxWidth - Canvas css-max-width
  *  @param {number} option.cssMaxHeight - Canvas css-max-height
@@ -389,11 +389,18 @@ class Graphics {
 
     /**
      * To data url from canvas
-     * @param {string} type - A DOMString indicating the image format. The default type is image/png.
+     * @param {Object} options - options for toDataURL
+     *   @param {String} [options.format=png] The format of the output image. Either "jpeg" or "png"
+     *   @param {Number} [options.quality=1] Quality level (0..1). Only used for jpeg.
+     *   @param {Number} [options.multiplier=1] Multiplier to scale by
+     *   @param {Number} [options.left] Cropping left offset. Introduced in fabric v1.2.14
+     *   @param {Number} [options.top] Cropping top offset. Introduced in fabric v1.2.14
+     *   @param {Number} [options.width] Cropping width. Introduced in fabric v1.2.14
+     *   @param {Number} [options.height] Cropping height. Introduced in fabric v1.2.14
      * @returns {string} A DOMString containing the requested data URI.
      */
-    toDataURL(type) {
-        return this._canvas && this._canvas.toDataURL(type);
+    toDataURL(options) {
+        return this._canvas && this._canvas.toDataURL(options);
     }
 
     /**
@@ -543,6 +550,14 @@ class Graphics {
      */
     getCropzoneRect() {
         return this.getComponent(components.CROPPER).getCropzoneRect();
+    }
+
+    /**
+     * Get cropped rect
+     * @param {number} [mode] cropzone rect mode
+     */
+    setCropzoneRect(mode) {
+        this.getComponent(components.CROPPER).setCropzoneRect(mode);
     }
 
     /**
@@ -753,16 +768,14 @@ class Graphics {
 
     /**
      * Set canvas element to fabric.Canvas
-     * @param {jQuery|Element|string} element - Wrapper or canvas element or selector
+     * @param {Element|string} element - Wrapper or canvas element or selector
      * @private
      */
     _setCanvasElement(element) {
         let selectedElement;
         let canvasElement;
 
-        if (element.jquery) {
-            [selectedElement] = element;
-        } else if (element.nodeType) {
+        if (element.nodeType) {
             selectedElement = element;
         } else {
             selectedElement = document.querySelector(element);

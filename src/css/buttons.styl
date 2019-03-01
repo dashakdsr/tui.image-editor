@@ -5,6 +5,7 @@
     &.icon-location .{prefix}-button[data-icontype="icon-location"] svg > use.active,
     &.icon-polygon .{prefix}-button[data-icontype="icon-polygon"] svg > use.active,
     &.icon-star .{prefix}-button[data-icontype="icon-star"] svg > use.active,
+    &.icon-star-2 .{prefix}-button[data-icontype="icon-star-2"] svg > use.active,
     &.icon-arrow-3 .{prefix}-button[data-icontype="icon-arrow-3"] svg > use.active,
     &.icon-arrow-2 .{prefix}-button[data-icontype="icon-arrow-2"] svg > use.active,
     &.icon-arrow .{prefix}-button[data-icontype="icon-arrow"] svg > use.active,
@@ -30,18 +31,21 @@
         display: none;
     svg > use.active
         display: block;
-        
+
 /*  MASK BUTTON */
 #tie-mask-apply.apply.active .{prefix}-button.apply
     label
         color: #fff;
     svg > use.active
         display: block;
-  
+
 /* CROP BUTTON */
-#tie-crop-button
+#tie-crop-button,
+#tie-crop-preset-button
     .{prefix}-button.apply
         margin-right: 24px;
+    .{prefix}-button.preset.active svg > use.active
+        display: block;
     .{prefix}-button.apply.active svg > use.active
         display: block;
 
@@ -50,7 +54,7 @@
 #tie-shape-button
   &.rect .{prefix}-button.rect,
   &.circle .{prefix}-button.circle,
-  &.triangle .{prefix}-button.triangle 
+  &.triangle .{prefix}-button.triangle
     svg > use.normal
         display: none;
     svg > use.active
