@@ -1,19 +1,19 @@
 /*!
  * tui-image-editor.js
- * @version 3.2.0
+ * @version 3.5.1
  * @author NHNEnt FE Development Lab <dl_javascript@nhnent.com>
  * @license MIT
  */
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
-		module.exports = factory(require("tui-code-snippet"), require("fabric/dist/fabric.require"));
+		module.exports = factory(require("tui-code-snippet"), require("tui-color-picker"), require("fabric/dist/fabric.require"));
 	else if(typeof define === 'function' && define.amd)
-		define(["tui-code-snippet", "fabric/dist/fabric.require"], factory);
+		define(["tui-code-snippet", "tui-color-picker", "fabric/dist/fabric.require"], factory);
 	else if(typeof exports === 'object')
-		exports["ImageEditor"] = factory(require("tui-code-snippet"), require("fabric/dist/fabric.require"));
+		exports["ImageEditor"] = factory(require("tui-code-snippet"), require("tui-color-picker"), require("fabric/dist/fabric.require"));
 	else
-		root["tui"] = root["tui"] || {}, root["tui"]["ImageEditor"] = factory((root["tui"] && root["tui"]["util"]), root["fabric"]);
-})(this, function(__WEBPACK_EXTERNAL_MODULE_3__, __WEBPACK_EXTERNAL_MODULE_105__) {
+		root["tui"] = root["tui"] || {}, root["tui"]["ImageEditor"] = factory((root["tui"] && root["tui"]["util"]), (root["tui"] && root["tui"]["colorPicker"]), root["fabric"]);
+})(this, function(__WEBPACK_EXTERNAL_MODULE_3__, __WEBPACK_EXTERNAL_MODULE_82__, __WEBPACK_EXTERNAL_MODULE_106__) {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -68,9 +68,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _imageEditor2 = _interopRequireDefault(_imageEditor);
 
-	__webpack_require__(130);
-
-	__webpack_require__(132);
+	__webpack_require__(131);
 
 	__webpack_require__(133);
 
@@ -107,6 +105,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	__webpack_require__(149);
 
 	__webpack_require__(150);
+
+	__webpack_require__(151);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -609,7 +609,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _ui2 = _interopRequireDefault(_ui);
 
-	var _action = __webpack_require__(102);
+	var _action = __webpack_require__(103);
 
 	var _action2 = _interopRequireDefault(_action);
 
@@ -617,7 +617,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _command2 = _interopRequireDefault(_command);
 
-	var _graphics = __webpack_require__(104);
+	var _graphics = __webpack_require__(105);
 
 	var _graphics2 = _interopRequireDefault(_graphics);
 
@@ -642,7 +642,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	/**
 	 * Image editor
 	 * @class
-	 * @param {string|jQuery|HTMLElement} wrapper - Wrapper's element or selector
+	 * @param {string|HTMLElement} wrapper - Wrapper's element or selector
 	 * @param {Object} [options] - Canvas max width & height of css
 	 *  @param {number} [options.includeUI] - Use the provided UI
 	 *    @param {Object} [options.includeUI.loadImage] - Basic editing image
@@ -651,9 +651,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	 *    @param {Object} [options.includeUI.theme] - Theme object
 	 *    @param {Array} [options.includeUI.menu] - It can be selected when only specific menu is used. [default all]
 	 *    @param {string} [options.includeUI.initMenu] - The first menu to be selected and started.
+	 *    @param {Object} [options.includeUI.uiSize] - ui size of editor
+	 *      @param {string} options.includeUI.uiSize.width - width of ui
+	 *      @param {string} options.includeUI.uiSize.height - height of ui
 	 *    @param {string} [options.includeUI.menuBarPosition=bottom] - Menu bar position [top | bottom | left | right]
 	 *  @param {number} options.cssMaxWidth - Canvas css-max-width
 	 *  @param {number} options.cssMaxHeight - Canvas css-max-height
+	 *  @param {Object} [options.selectionStyle] - selection style
+	 *  @param {string} [options.selectionStyle.cornerStyle] - selection corner style
+	 *  @param {number} [options.selectionStyle.cornerSize] - selection corner size
+	 *  @param {string} [options.selectionStyle.cornerColor] - selection corner color
+	 *  @param {string} [options.selectionStyle.cornerStrokeColor] = selection corner stroke color
+	 *  @param {boolean} [options.selectionStyle.transparentCorners] - selection corner transparent
+	 *  @param {number} [options.selectionStyle.lineWidth] - selection line width
+	 *  @param {string} [options.selectionStyle.borderColor] - selection border color
+	 *  @param {number} [options.selectionStyle.rotatingPointOffset] - selection rotating point length
 	 *  @param {Boolean} [options.usageStatistics=true] - Let us know the hostname. If you don't want to send the hostname, please set to false.
 	 * @example
 	 * var ImageEditor = require('tui-image-editor');
@@ -667,6 +679,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	 *     theme: blackTheme, // or whiteTheme
 	 *     menu: ['shape', 'filter'],
 	 *     initMenu: 'filter',
+	 *     uiSize: {
+	 *         width: '1000px',
+	 *         height: '700px'
+	 *     },
 	 *     menuBarPosition: 'bottom'
 	 *   },
 	 *   cssMaxWidth: 700,
@@ -798,13 +814,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	     * @property {number} id - object id
 	     * @property {string} type - object type
 	     * @property {string} text - text content
-	     * @property {string} left - Left
-	     * @property {string} top - Top
-	     * @property {string} width - Width
-	     * @property {string} height - Height
+	     * @property {(string | number)} left - Left
+	     * @property {(string | number)} top - Top
+	     * @property {(string | number)} width - Width
+	     * @property {(string | number)} height - Height
 	     * @property {string} fill - Color
 	     * @property {string} stroke - Stroke
-	     * @property {string} strokeWidth - StrokeWidth
+	     * @property {(string | number)} strokeWidth - StrokeWidth
 	     * @property {string} fontFamily - Font type for text
 	     * @property {number} fontSize - Font Size
 	     * @property {string} fontStyle - Type of inclination (normal / italic)
@@ -939,6 +955,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: '_onKeyDown',
 	        value: function _onKeyDown(e) {
+	            var activeObject = this._graphics.getActiveObject();
+	            var activeObjectGroup = this._graphics.getActiveGroupObject();
+	            var existRemoveObject = activeObject || activeObjectGroup;
+
 	            if ((e.ctrlKey || e.metaKey) && e.keyCode === keyCodes.Z) {
 	                // There is no error message on shortcut when it's empty
 	                this.undo()['catch'](function () {});
@@ -949,7 +969,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                this.redo()['catch'](function () {});
 	            }
 
-	            if (e.keyCode === keyCodes.BACKSPACE || e.keyCode === keyCodes.DEL) {
+	            if ((e.keyCode === keyCodes.BACKSPACE || e.keyCode === keyCodes.DEL) && existRemoveObject) {
 	                e.preventDefault();
 	                this.removeActiveObject();
 	            }
@@ -1374,6 +1394,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 
 	        /**
+	         * Set the cropping rect
+	         * @param {number} [mode] crop rect mode [1, 1.5, 1.3333333333333333, 1.25, 1.7777777777777777]
+	         */
+
+	    }, {
+	        key: 'setCropzoneRect',
+	        value: function setCropzoneRect(mode) {
+	            this._graphics.setCropzoneRect(mode);
+	        }
+
+	        /**
 	         * Flip
 	         * @returns {Promise}
 	         * @param {string} type - 'flipX' or 'flipY' or 'reset'
@@ -1585,7 +1616,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	         *      @param {number} [options.ry] - Radius y value (When type option is 'circle', this options can use)
 	         *      @param {number} [options.left] - Shape x position
 	         *      @param {number} [options.top] - Shape y position
-	         *      @param {number} [options.isRegular] - Whether resizing shape has 1:1 ratio or not
+	         *      @param {boolean} [options.isRegular] - Whether resizing shape has 1:1 ratio or not
 	         * @returns {Promise<ObjectProps, ErrorMsg>}
 	         * @example
 	         * imageEditor.addShape('rect', {
@@ -1632,7 +1663,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	         *      @param {number} [options.height] - Height value (When type option is 'rect', this options can use)
 	         *      @param {number} [options.rx] - Radius x value (When type option is 'circle', this options can use)
 	         *      @param {number} [options.ry] - Radius y value (When type option is 'circle', this options can use)
-	         *      @param {number} [options.isRegular] - Whether resizing shape has 1:1 ratio or not
+	         *      @param {boolean} [options.isRegular] - Whether resizing shape has 1:1 ratio or not
 	         * @returns {Promise}
 	         * @example
 	         * // call after selecting shape object on canvas
@@ -1680,7 +1711,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	         * imageEditor.addText('init text', {
 	         *     styles: {
 	         *         fill: '#000',
-	         *         fontSize: '20',
+	         *         fontSize: 20,
 	         *         fontWeight: 'bold'
 	         *     },
 	         *     position: {
@@ -1931,8 +1962,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	         * @param {string} type - Icon type ('arrow', 'cancel', custom icon name)
 	         * @param {Object} options - Icon options
 	         *      @param {string} [options.fill] - Icon foreground color
-	         *      @param {string} [options.left] - Icon x position
-	         *      @param {string} [options.top] - Icon y position
+	         *      @param {number} [options.left] - Icon x position
+	         *      @param {number} [options.top] - Icon y position
 	         * @returns {Promise<ObjectProps, ErrorMsg>}
 	         * @example
 	         * imageEditor.addIcon('arrow'); // The position is center on canvas
@@ -2040,7 +2071,14 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        /**
 	         * Get data url
-	         * @param {string} type - A DOMString indicating the image format. The default type is image/png.
+	         * @param {Object} options - options for toDataURL
+	         *   @param {String} [options.format=png] The format of the output image. Either "jpeg" or "png"
+	         *   @param {Number} [options.quality=1] Quality level (0..1). Only used for jpeg.
+	         *   @param {Number} [options.multiplier=1] Multiplier to scale by
+	         *   @param {Number} [options.left] Cropping left offset. Introduced in fabric v1.2.14
+	         *   @param {Number} [options.top] Cropping top offset. Introduced in fabric v1.2.14
+	         *   @param {Number} [options.width] Cropping width. Introduced in fabric v1.2.14
+	         *   @param {Number} [options.height] Cropping height. Introduced in fabric v1.2.14
 	         * @returns {string} A DOMString containing the requested data URI
 	         * @example
 	         * imgEl.src = imageEditor.toDataURL();
@@ -2052,8 +2090,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    }, {
 	        key: 'toDataURL',
-	        value: function toDataURL(type) {
-	            return this._graphics.toDataURL(type);
+	        value: function toDataURL(options) {
+	            return this._graphics.toDataURL(options);
 	        }
 
 	        /**
@@ -4420,6 +4458,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var hostnameSent = false;
 
 	module.exports = {
+
 	    /**
 	     * Clamp value
 	     * @param {number} value - Value
@@ -4552,22 +4591,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	     * send hostname
 	     */
 	    sendHostName: function sendHostName() {
-	        var _location = location,
-	            hostname = _location.hostname;
-
 	        if (hostnameSent) {
 	            return;
 	        }
 	        hostnameSent = true;
 
-	        (0, _tuiCodeSnippet.imagePing)('https://www.google-analytics.com/collect', {
-	            v: 1,
-	            t: 'event',
-	            tid: 'UA-115377265-9',
-	            cid: hostname,
-	            dp: hostname,
-	            dh: 'image-editor'
-	        });
+	        (0, _tuiCodeSnippet.sendHostname)('image-editor', 'UA-129999381-1');
 	    },
 
 
@@ -4744,18 +4773,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	     * @type {Object.<string, string>}
 	     */
 	    rejectMessages: {
+	        addedObject: 'The object is already added.',
 	        flip: 'The flipX and flipY setting values are not changed.',
-	        rotation: 'The current angle is same the old angle.',
-	        loadImage: 'The background image is empty.',
+	        invalidDrawingMode: 'This operation is not supported in the drawing mode.',
+	        invalidParameters: 'Invalid parameters.',
 	        isLock: 'The executing command state is locked.',
-	        undo: 'The promise of undo command is reject.',
-	        redo: 'The promise of redo command is reject.',
-	        invalidDrawingMode: 'This operation is not supported in the drawing mode',
-	        invalidParameters: 'Invalid parameters',
+	        loadImage: 'The background image is empty.',
+	        loadingImageFailed: 'Invalid image loaded.',
 	        noActiveObject: 'There is no active object.',
-	        unsupportedType: 'Unsupported object type',
 	        noObject: 'The object is not in canvas.',
-	        addedObject: 'The object is already added.'
+	        redo: 'The promise of redo command is reject.',
+	        rotation: 'The current angle is same the old angle.',
+	        undo: 'The promise of undo command is reject.',
+	        unsupportedOperation: 'Unsupported operation.',
+	        unsupportedType: 'Unsupported object type.'
 	    },
 
 	    /**
@@ -4916,6 +4947,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _filter2 = _interopRequireDefault(_filter);
 
+	var _locale = __webpack_require__(102);
+
+	var _locale2 = _interopRequireDefault(_locale);
+
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -4937,14 +4972,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	/**
 	 * Ui class
 	 * @class
-	 * @param {string|jQuery|HTMLElement} element - Wrapper's element or selector
+	 * @param {string|HTMLElement} element - Wrapper's element or selector
 	 * @param {Object} [options] - Ui setting options
 	 *   @param {number} option.loadImage - Init default load image
 	 *   @param {number} option.initMenu - Init start menu
 	 *   @param {Boolean} [option.menuBarPosition=bottom] - Let
 	 *   @param {Boolean} [option.applyCropSelectionStyle=false] - Let
+	 *   @param {Object} [options.uiSize] - ui size of editor
+	 *     @param {string} options.uiSize.width - width of ui
+	 *     @param {string} options.uiSize.height - height of ui
 	 * @param {Objecdt} actions - ui action instance
-	 * @ignore
 	 */
 
 	var Ui = function () {
@@ -4952,11 +4989,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	        _classCallCheck(this, Ui);
 
 	        this.options = this._initializeOption(options);
-
 	        this._actions = actions;
 	        this.submenu = false;
 	        this.imageSize = {};
 	        this.uiSize = {};
+	        this._locale = new _locale2.default(this.options.locale);
 	        this.theme = new _theme2.default(this.options.theme);
 
 	        this._submenuChangeTransection = false;
@@ -4968,6 +5005,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this._subMenuElement = null;
 	        this._makeUiElement(element);
 	        this._setUiSize();
+	        this._initMenuEvent = false;
 
 	        this._els = {
 	            'undo': this._menuElement.querySelector('#tie-btn-undo'),
@@ -4986,6 +5024,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	     * Set Default Selection for includeUI
 	     * @param {Object} option - imageEditor options
 	     * @returns {Object} - extends selectionStyle option
+	     * @ignore
 	     */
 
 
@@ -4997,9 +5036,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	                applyGroupSelectionStyle: true,
 	                selectionStyle: {
 	                    cornerStyle: 'circle',
-	                    cornerSize: 20,
+	                    cornerSize: 16,
 	                    cornerColor: '#fff',
-	                    cornerStrokeColor: '#000',
+	                    cornerStrokeColor: '#fff',
 	                    transparentCorners: false,
 	                    lineWidth: 2,
 	                    borderColor: '#fff'
@@ -5018,6 +5057,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	         *     @param {Number} resizeInfo.imageSize.oldHeight - old height
 	         *     @param {Number} resizeInfo.imageSize.newWidth - new width
 	         *     @param {Number} resizeInfo.imageSize.newHeight - new height
+	         * @example
+	         * // Change the image size and ui size, and change the affected ui state together.
+	         * imageEditor.ui.resizeEditor({
+	         *     imageSize: {oldWidth: 100, oldHeight: 100, newWidth: 700, newHeight: 700},
+	         *     uiSize: {width: 1000, height: 1000}
+	         * });
+	         * @example
+	         * // Apply the ui state while preserving the previous attribute (for example, if responsive Ui)
+	         * imageEditor.ui.resizeEditor();
 	         */
 
 	    }, {
@@ -5046,16 +5094,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	            editorElementStyle.height = height + 'px';
 	            editorElementStyle.width = width + 'px';
 
-	            var _getEditorPosition2 = this._getEditorPosition(menuBarPosition),
-	                top = _getEditorPosition2.top,
-	                bottom = _getEditorPosition2.bottom,
-	                left = _getEditorPosition2.left,
-	                right = _getEditorPosition2.right;
+	            this._setEditorPosition(menuBarPosition);
 
-	            this._editorElementWrap.style.bottom = bottom + 'px';
-	            this._editorElementWrap.style.top = top + 'px';
-	            this._editorElementWrap.style.left = left + 'px';
-	            this._editorElementWrap.style.width = 'calc(100% - ' + right + 'px)';
+	            this._editorElementWrap.style.bottom = '0px';
+	            this._editorElementWrap.style.top = '0px';
+	            this._editorElementWrap.style.left = '0px';
+	            this._editorElementWrap.style.width = '100%';
+
 	            var selectElementClassList = this._selectedElement.classList;
 
 	            if (menuBarPosition === 'top' && this._selectedElement.offsetWidth < BI_EXPRESSION_MINSIZE_WHEN_TOP_POSITION) {
@@ -5068,6 +5113,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        /**
 	         * Change undo button status
 	         * @param {Boolean} enableStatus - enabled status
+	         * @ignore
 	         */
 
 	    }, {
@@ -5083,6 +5129,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        /**
 	         * Change redo button status
 	         * @param {Boolean} enableStatus - enabled status
+	         * @ignore
 	         */
 
 	    }, {
@@ -5098,6 +5145,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        /**
 	         * Change reset button status
 	         * @param {Boolean} enableStatus - enabled status
+	         * @ignore
 	         */
 
 	    }, {
@@ -5113,6 +5161,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        /**
 	         * Change delete-all button status
 	         * @param {Boolean} enableStatus - enabled status
+	         * @ignore
 	         */
 
 	    }, {
@@ -5128,6 +5177,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        /**
 	         * Change delete button status
 	         * @param {Boolean} enableStatus - enabled status
+	         * @ignore
 	         */
 
 	    }, {
@@ -5143,10 +5193,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	        /**
 	         * Change delete button status
 	         * @param {Object} [options] - Ui setting options
-	         *   @param {number} option.loadImage - Init default load image
-	         *   @param {number} option.initMenu - Init start menu
-	         *   @param {Boolean} [option.menuBarPosition=bottom] - Let
-	         *   @param {Boolean} [option.applyCropSelectionStyle=false] - Let
+	         *   @param {object} [option.loadImage] - Init default load image
+	         *   @param {string} [option.initMenu] - Init start menu
+	         *   @param {string} [option.menuBarPosition=bottom] - Let
+	         *   @param {boolean} [option.applyCropSelectionStyle=false] - Let
 	         * @returns {Object} initialize option
 	         * @private
 	         */
@@ -5159,9 +5209,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    path: '',
 	                    name: ''
 	                },
+	                locale: {},
 	                menuIconPath: '',
 	                menu: ['crop', 'flip', 'rotate', 'draw', 'shape', 'icon', 'text', 'mask', 'filter'],
-	                initMenu: false,
+	                initMenu: '',
 	                uiSize: {
 	                    width: '100%',
 	                    height: '100%'
@@ -5211,6 +5262,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	                // submenu ui instance
 	                _this[menuName] = new SubComponentClass(_this._subMenuElement, {
+	                    locale: _this._locale,
 	                    iconStyle: _this.theme.getStyle('submenu.icon'),
 	                    menuBarPosition: _this.options.menuBarPosition
 	                });
@@ -5219,7 +5271,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        /**
 	         * Make primary ui dom element
-	         * @param {string|jQuery|HTMLElement} element - Wrapper's element or selector
+	         * @param {string|HTMLElement} element - Wrapper's element or selector
 	         * @private
 	         */
 
@@ -5230,9 +5282,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            window.snippet = _tuiCodeSnippet2.default;
 
-	            if (element.jquery) {
-	                selectedElement = element[0];
-	            } else if (element.nodeType) {
+	            if (element.nodeType) {
 	                selectedElement = element;
 	            } else {
 	                selectedElement = document.querySelector(element);
@@ -5241,11 +5291,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            selectedElement.classList.add('tui-image-editor-container');
 	            selectedElement.innerHTML = (0, _controls2.default)({
+	                locale: this._locale,
 	                biImage: this.theme.getStyle('common.bi'),
 	                iconStyle: this.theme.getStyle('menu.icon'),
 	                loadButtonStyle: this.theme.getStyle('loadButton'),
 	                downloadButtonStyle: this.theme.getStyle('downloadButton')
 	            }) + (0, _mainContainer2.default)({
+	                locale: this._locale,
 	                biImage: this.theme.getStyle('common.bi'),
 	                commonStyle: this.theme.getStyle('common'),
 	                headerStyle: this.theme.getStyle('header'),
@@ -5277,13 +5329,16 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            var _theme$getStyle = this.theme.getStyle('menu.icon'),
 	                normal = _theme$getStyle.normal,
-	                active = _theme$getStyle.active;
+	                active = _theme$getStyle.active,
+	                hover = _theme$getStyle.hover;
 
-	            var menuItemHtml = '\n            <svg class="svg_ic-menu">\n                <use xlink:href="' + normal.path + '#' + normal.name + '-ic-' + menuName + '" class="normal"/>\n                <use xlink:href="' + active.path + '#' + active.name + '-ic-' + menuName + '" class="active"/>\n            </svg>\n        ';
+	            var menuItemHtml = '\n            <svg class="svg_ic-menu">\n                <use xlink:href="' + normal.path + '#' + normal.name + '-ic-' + menuName + '" class="normal"/>\n                <use xlink:href="' + active.path + '#' + active.name + '-ic-' + menuName + '" class="active"/>\n                <use xlink:href="' + hover.path + '#' + hover.name + '-ic-' + menuName + '" class="hover"/>\n            </svg>\n        ';
 
 	            btnElement.id = 'tie-btn-' + menuName;
-	            btnElement.className = 'tui-image-editor-item';
-	            btnElement.title = menuName;
+	            btnElement.className = 'tui-image-editor-item normal';
+	            btnElement.title = this._locale.localize(menuName.replace(/^[a-z]/g, function ($0) {
+	                return $0.toUpperCase();
+	            }));
 	            btnElement.innerHTML = menuItemHtml;
 
 	            this._menuElement.appendChild(btnElement);
@@ -5370,6 +5425,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        /**
 	         * get editor area element
 	         * @returns {HTMLElement} editor area html element
+	         * @ignore
 	         */
 
 	    }, {
@@ -5379,33 +5435,53 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 
 	        /**
+	         * Add event for menu items
+	         * @ignore
+	         */
+
+	    }, {
+	        key: 'activeMenuEvent',
+	        value: function activeMenuEvent() {
+	            var _this6 = this;
+
+	            if (this._initMenuEvent) {
+	                return;
+	            }
+
+	            this._addHelpActionEvent('undo');
+	            this._addHelpActionEvent('redo');
+	            this._addHelpActionEvent('reset');
+	            this._addHelpActionEvent('delete');
+	            this._addHelpActionEvent('deleteAll');
+
+	            this._addDownloadEvent();
+
+	            _tuiCodeSnippet2.default.forEach(this.options.menu, function (menuName) {
+	                _this6._addMenuEvent(menuName);
+	                _this6._addSubMenuEvent(menuName);
+	            });
+	            this._initMenu();
+	            this._initMenuEvent = true;
+	        }
+
+	        /**
 	         * Init canvas
+	         * @ignore
 	         */
 
 	    }, {
 	        key: 'initCanvas',
 	        value: function initCanvas() {
-	            var _this6 = this;
+	            var _this7 = this;
 
 	            var loadImageInfo = this._getLoadImage();
-	            if (loadImageInfo) {
+	            if (loadImageInfo.path) {
 	                this._actions.main.initLoadImage(loadImageInfo.path, loadImageInfo.name).then(function () {
-	                    _this6._addHelpActionEvent('undo');
-	                    _this6._addHelpActionEvent('redo');
-	                    _this6._addHelpActionEvent('reset');
-	                    _this6._addHelpActionEvent('delete');
-	                    _this6._addHelpActionEvent('deleteAll');
-
-	                    _this6._addDownloadEvent();
-	                    _this6._addLoadEvent();
-
-	                    _tuiCodeSnippet2.default.forEach(_this6.options.menu, function (menuName) {
-	                        _this6._addMenuEvent(menuName);
-	                        _this6._addSubMenuEvent(menuName);
-	                    });
-	                    _this6._initMenu();
+	                    _this7.activeMenuEvent();
 	                });
 	            }
+
+	            this._addLoadEvent();
 
 	            var gridVisual = document.createElement('div');
 	            gridVisual.className = 'tui-image-editor-grid-visual';
@@ -5417,7 +5493,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        /**
 	         * get editor area element
-	         * @returns {Object} loadimage optionk
+	         * @returns {Object} load image option
 	         * @private
 	         */
 
@@ -5432,6 +5508,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	         * @param {string} menuName - menu name
 	         * @param {boolean} toggle - whether toogle or not
 	         * @param {boolean} discardSelection - discard selection
+	         * @ignore
 	         */
 
 	    }, {
@@ -5492,9 +5569,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	                var evt = document.createEvent('MouseEvents');
 	                evt.initEvent('click', true, false);
 	                this._els[this.options.initMenu].dispatchEvent(evt);
-	                if (this.icon) {
-	                    this.icon.registDefaultIcon();
-	                }
+	            }
+
+	            if (this.icon) {
+	                this.icon.registDefaultIcon();
 	            }
 	        }
 
@@ -5520,46 +5598,51 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 
 	        /**
-	         * Get editor position
+	         * Set editor position
 	         * @param {string} menuBarPosition - top or right or bottom or left
-	         * @returns {Object} - positions (top, right, bottom, left)
 	         * @private
 	         */
 
 	    }, {
-	        key: '_getEditorPosition',
-	        value: function _getEditorPosition(menuBarPosition) {
-	            var bottom = 0;
+	        key: '_setEditorPosition',
+	        value: function _setEditorPosition(menuBarPosition) {
+	            var _getEditorDimension3 = this._getEditorDimension(),
+	                width = _getEditorDimension3.width,
+	                height = _getEditorDimension3.height;
+
+	            var editorElementStyle = this._editorElement.style;
 	            var top = 0;
 	            var left = 0;
-	            var right = 0;
 
 	            if (this.submenu) {
-	                switch (menuBarPosition) {
-	                    case 'bottom':
-	                        bottom += 150;
-	                        break;
-	                    case 'top':
-	                        top += 150;
-	                        break;
-	                    case 'left':
-	                        left += 248;
-	                        right += 248;
-	                        break;
-	                    case 'right':
-	                        right += 248;
-	                        break;
-	                    default:
-	                        break;
+	                if (menuBarPosition === 'bottom') {
+	                    if (height > this._editorElementWrap.scrollHeight - 150) {
+	                        top = (height - this._editorElementWrap.scrollHeight) / 2;
+	                    } else {
+	                        top = 150 / 2 * -1;
+	                    }
+	                } else if (menuBarPosition === 'top') {
+	                    if (height > this._editorElementWrap.offsetHeight - 150) {
+	                        top = 150 / 2 - (height - (this._editorElementWrap.offsetHeight - 150)) / 2;
+	                    } else {
+	                        top = 150 / 2;
+	                    }
+	                } else if (menuBarPosition === 'left') {
+	                    if (width > this._editorElementWrap.offsetWidth - 248) {
+	                        left = 248 / 2 - (width - (this._editorElementWrap.offsetWidth - 248)) / 2;
+	                    } else {
+	                        left = 248 / 2;
+	                    }
+	                } else if (menuBarPosition === 'right') {
+	                    if (width > this._editorElementWrap.scrollWidth - 248) {
+	                        left = (width - this._editorElementWrap.scrollWidth) / 2;
+	                    } else {
+	                        left = 248 / 2 * -1;
+	                    }
 	                }
 	            }
-
-	            return {
-	                top: top,
-	                bottom: bottom,
-	                left: left,
-	                right: right
-	            };
+	            editorElementStyle.top = top + 'px';
+	            editorElementStyle.left = left + 'px';
 	        }
 	    }]);
 
@@ -5572,40 +5655,43 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 75 */
 /***/ (function(module, exports) {
 
-	"use strict";
+	'use strict';
 
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
 
 	exports.default = function (_ref) {
-	    var biImage = _ref.biImage,
+	    var locale = _ref.locale,
+	        biImage = _ref.biImage,
 	        commonStyle = _ref.commonStyle,
 	        headerStyle = _ref.headerStyle,
 	        loadButtonStyle = _ref.loadButtonStyle,
 	        downloadButtonStyle = _ref.downloadButtonStyle,
 	        submenuStyle = _ref.submenuStyle;
-	    return "\n    <div class=\"tui-image-editor-main-container\" style=\"" + commonStyle + "\">\n        <div class=\"tui-image-editor-header\" style=\"" + headerStyle + "\">\n            <div class=\"tui-image-editor-header-logo\">\n                <img src=\"" + biImage + "\" />\n            </div>\n            <div class=\"tui-image-editor-header-buttons\">\n                <button style=\"" + loadButtonStyle + "\">\n                    Load\n                    <input type=\"file\" class=\"tui-image-editor-load-btn\" />\n                </button>\n                <button class=\"tui-image-editor-download-btn\" style=\"" + downloadButtonStyle + "\">\n                    Download\n                </button>\n            </div>\n        </div>\n        <div class=\"tui-image-editor-main\">\n            <div class=\"tui-image-editor-submenu\" style=\"" + submenuStyle + "\">\n            </div>\n            <div class=\"tui-image-editor-wrap\">\n                <div class=\"tui-image-editor-size-wrap\">\n                    <div class=\"tui-image-editor-align-wrap\">\n                        <div class=\"tui-image-editor\"></div>\n                    </div>\n                </div>\n            </div>\n        </div>\n    </div>\n";
+	    return '\n    <div class="tui-image-editor-main-container" style="' + commonStyle + '">\n        <div class="tui-image-editor-header" style="' + headerStyle + '">\n            <div class="tui-image-editor-header-logo">\n                <img src="' + biImage + '" />\n            </div>\n            <div class="tui-image-editor-header-buttons">\n                <div style="' + loadButtonStyle + '">\n                    ' + locale.localize('Load') + '\n                    <input type="file" class="tui-image-editor-load-btn" />\n                </div>\n                <button class="tui-image-editor-download-btn" style="' + downloadButtonStyle + '">\n                    ' + locale.localize('Download') + '\n                </button>\n            </div>\n        </div>\n        <div class="tui-image-editor-main">\n            <div class="tui-image-editor-submenu">\n                <div class="tui-image-editor-submenu-style" style="' + submenuStyle + '"></div>\n            </div>\n            <div class="tui-image-editor-wrap">\n                <div class="tui-image-editor-size-wrap">\n                    <div class="tui-image-editor-align-wrap">\n                        <div class="tui-image-editor"></div>\n                    </div>\n                </div>\n            </div>\n        </div>\n    </div>\n';
 	};
 
 /***/ }),
 /* 76 */
 /***/ (function(module, exports) {
 
-	"use strict";
+	'use strict';
 
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
 
 	exports.default = function (_ref) {
-	    var biImage = _ref.biImage,
+	    var locale = _ref.locale,
+	        biImage = _ref.biImage,
 	        _ref$iconStyle = _ref.iconStyle,
 	        normal = _ref$iconStyle.normal,
-	        active = _ref$iconStyle.active,
+	        hover = _ref$iconStyle.hover,
+	        disabled = _ref$iconStyle.disabled,
 	        loadButtonStyle = _ref.loadButtonStyle,
 	        downloadButtonStyle = _ref.downloadButtonStyle;
-	    return "\n    <div class=\"tui-image-editor-controls\">\n        <div class=\"tui-image-editor-controls-logo\">\n            <img src=\"" + biImage + "\" />\n        </div>\n        <ul class=\"tui-image-editor-menu\">\n            <li id=\"tie-btn-undo\" class=\"tui-image-editor-item\" title=\"undo\">\n                <svg class=\"svg_ic-menu\">\n                    <use xlink:href=\"" + active.path + "#" + active.name + "-ic-undo\" class=\"enabled\"/>\n                    <use xlink:href=\"" + normal.path + "#" + normal.name + "-ic-undo\" class=\"normal\"/>\n                </svg>\n            </li>\n            <li id=\"tie-btn-redo\" class=\"tui-image-editor-item\" title=\"redo\">\n                <svg class=\"svg_ic-menu\">\n                    <use xlink:href=\"" + active.path + "#" + active.name + "-ic-redo\" class=\"enabled\"/>\n                    <use xlink:href=\"" + normal.path + "#" + normal.name + "-ic-redo\" class=\"normal\"/>\n                </svg>\n            </li>\n            <li id=\"tie-btn-reset\" class=\"tui-image-editor-item\" title=\"reset\">\n                <svg class=\"svg_ic-menu\">\n                    <use xlink:href=\"" + active.path + "#" + active.name + "-ic-reset\" class=\"enabled\"/>\n                    <use xlink:href=\"" + normal.path + "#" + normal.name + "-ic-reset\" class=\"normal\"/>\n                </svg>\n            </li>\n            <li class=\"tui-image-editor-item\">\n                <div class=\"tui-image-editor-icpartition\"></div>\n            </li>\n            <li id=\"tie-btn-delete\" class=\"tui-image-editor-item\" title=\"delete\">\n                <svg class=\"svg_ic-menu\">\n                    <use xlink:href=\"" + active.path + "#" + active.name + "-ic-delete\" class=\"enabled\"/>\n                    <use xlink:href=\"" + normal.path + "#" + normal.name + "-ic-delete\" class=\"normal\"/>\n                </svg>\n            </li>\n            <li id=\"tie-btn-delete-all\" class=\"tui-image-editor-item\" title=\"delete-all\">\n                <svg class=\"svg_ic-menu\">\n                    <use xlink:href=\"" + active.path + "#" + active.name + "-ic-delete-all\" class=\"enabled\"/>\n                    <use xlink:href=\"" + normal.path + "#" + normal.name + "-ic-delete-all\" class=\"normal\"/>\n                </svg>\n            </li>\n            <li class=\"tui-image-editor-item\">\n                <div class=\"tui-image-editor-icpartition\"></div>\n            </li>\n        </ul>\n\n        <div class=\"tui-image-editor-controls-buttons\">\n            <button style=\"" + loadButtonStyle + "\">\n                Load\n                <input type=\"file\" class=\"tui-image-editor-load-btn\" />\n            </button>\n            <button class=\"tui-image-editor-download-btn\" style=\"" + downloadButtonStyle + "\">\n                Download\n            </button>\n        </div>\n    </div>\n";
+	    return '\n    <div class="tui-image-editor-controls">\n        <div class="tui-image-editor-controls-logo">\n            <img src="' + biImage + '" />\n        </div>\n        <ul class="tui-image-editor-menu">\n            <li id="tie-btn-undo" class="tui-image-editor-item" title="' + locale.localize('Undo') + '">\n                <svg class="svg_ic-menu">\n                    <use xlink:href="' + normal.path + '#' + normal.name + '-ic-undo" class="enabled"/>\n                    <use xlink:href="' + disabled.path + '#' + disabled.name + '-ic-undo" class="normal"/>\n                    <use xlink:href="' + hover.path + '#' + hover.name + '-ic-undo" class="hover"/>\n                </svg>\n            </li>\n            <li id="tie-btn-redo" class="tui-image-editor-item" title="' + locale.localize('Redo') + '">\n                <svg class="svg_ic-menu">\n                    <use xlink:href="' + normal.path + '#' + normal.name + '-ic-redo" class="enabled"/>\n                    <use xlink:href="' + disabled.path + '#' + disabled.name + '-ic-redo" class="normal"/>\n                    <use xlink:href="' + hover.path + '#' + hover.name + '-ic-redo" class="hover"/>\n                </svg>\n            </li>\n            <li id="tie-btn-reset" class="tui-image-editor-item" title="' + locale.localize('Reset') + '">\n                <svg class="svg_ic-menu">\n                    <use xlink:href="' + normal.path + '#' + normal.name + '-ic-reset" class="enabled"/>\n                    <use xlink:href="' + disabled.path + '#' + disabled.name + '-ic-reset" class="normal"/>\n                    <use xlink:href="' + hover.path + '#' + hover.name + '-ic-reset" class="hover"/>\n                </svg>\n            </li>\n            <li class="tui-image-editor-item">\n                <div class="tui-image-editor-icpartition"></div>\n            </li>\n            <li id="tie-btn-delete" class="tui-image-editor-item" title="' + locale.localize('Delete') + '">\n                <svg class="svg_ic-menu">\n                    <use xlink:href="' + normal.path + '#' + normal.name + '-ic-delete" class="enabled"/>\n                    <use xlink:href="' + disabled.path + '#' + disabled.name + '-ic-delete" class="normal"/>\n                    <use xlink:href="' + hover.path + '#' + hover.name + '-ic-delete" class="hover"/>\n                </svg>\n            </li>\n            <li id="tie-btn-delete-all" class="tui-image-editor-item" title="' + locale.localize('Delete-all') + '">\n                <svg class="svg_ic-menu">\n                    <use xlink:href="' + normal.path + '#' + normal.name + '-ic-delete-all" class="enabled"/>\n                    <use xlink:href="' + disabled.path + '#' + disabled.name + '-ic-delete-all" class="normal"/>\n                    <use xlink:href="' + hover.path + '#' + hover.name + '-ic-delete-all" class="hover"/>\n                </svg>\n            </li>\n            <li class="tui-image-editor-item">\n                <div class="tui-image-editor-icpartition"></div>\n            </li>\n        </ul>\n\n        <div class="tui-image-editor-controls-buttons">\n            <div style="' + loadButtonStyle + '">\n                ' + locale.localize('Load') + '\n                <input type="file" class="tui-image-editor-load-btn" />\n            </div>\n            <button class="tui-image-editor-download-btn" style="' + downloadButtonStyle + '">\n                ' + locale.localize('Download') + '\n            </button>\n        </div>\n    </div>\n';
 	};
 
 /***/ }),
@@ -5672,7 +5758,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	                case 'submenu.icon':
 	                    result = {
 	                        active: this.styles[firstProperty + '.activeIcon'],
-	                        normal: this.styles[firstProperty + '.normalIcon']
+	                        normal: this.styles[firstProperty + '.normalIcon'],
+	                        hover: this.styles[firstProperty + '.hoverIcon'],
+	                        disabled: this.styles[firstProperty + '.disabledIcon']
 	                    };
 	                    break;
 	                case 'submenu.label':
@@ -5687,6 +5775,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	                        horizontal: this._makeCssText((0, _tuiCodeSnippet.extend)({}, option, { borderBottom: '1px solid ' + option.color }))
 	                    };
 	                    break;
+
+	                case 'range.disabledPointer':
+	                case 'range.disabledBar':
+	                case 'range.disabledSubbar':
 	                case 'range.pointer':
 	                case 'range.bar':
 	                case 'range.subbar':
@@ -5723,6 +5815,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	                submenuRangePointer: this.getStyle('range.pointer'),
 	                submenuRangeBar: this.getStyle('range.bar'),
 	                submenuRangeSubbar: this.getStyle('range.subbar'),
+
+	                submenuDisabledRangePointer: this.getStyle('range.disabledPointer'),
+	                submenuDisabledRangeBar: this.getStyle('range.disabledBar'),
+	                submenuDisabledRangeSubbar: this.getStyle('range.disabledSubbar'),
+
 	                submenuRangeValue: this.getStyle('range.value'),
 	                submenuColorpickerTitle: this.getStyle('colorpicker.title'),
 	                submenuColorpickerButton: this.getStyle('colorpicker.button'),
@@ -5776,6 +5873,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                if (['backgroundImage'].indexOf(key) > -1 && value !== 'none') {
 	                    value = 'url(' + value + ')';
 	                }
+
 	                converterStack.push(_this._toUnderScore(key) + ': ' + value);
 	            });
 
@@ -5826,10 +5924,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	        submenuColorpickerButton = _ref.submenuColorpickerButton,
 	        submenuRangeBar = _ref.submenuRangeBar,
 	        submenuRangeSubbar = _ref.submenuRangeSubbar,
+	        submenuDisabledRangePointer = _ref.submenuDisabledRangePointer,
+	        submenuDisabledRangeBar = _ref.submenuDisabledRangeBar,
+	        submenuDisabledRangeSubbar = _ref.submenuDisabledRangeSubbar,
 	        submenuIconSize = _ref.submenuIconSize,
 	        menuIconSize = _ref.menuIconSize,
 	        biSize = _ref.biSize;
-	    return "\n    #tie-icon-add-button.icon-bubble .tui-image-editor-button[data-icontype=\"icon-bubble\"] label,\n    #tie-icon-add-button.icon-heart .tui-image-editor-button[data-icontype=\"icon-heart\"] label,\n    #tie-icon-add-button.icon-location .tui-image-editor-button[data-icontype=\"icon-location\"] label,\n    #tie-icon-add-button.icon-polygon .tui-image-editor-button[data-icontype=\"icon-polygon\"] label,\n    #tie-icon-add-button.icon-star .tui-image-editor-button[data-icontype=\"icon-star\"] label,\n    #tie-icon-add-button.icon-arrow-3 .tui-image-editor-button[data-icontype=\"icon-arrow-3\"] label,\n    #tie-icon-add-button.icon-arrow-2 .tui-image-editor-button[data-icontype=\"icon-arrow-2\"] label,\n    #tie-icon-add-button.icon-arrow .tui-image-editor-button[data-icontype=\"icon-arrow\"] label,\n    #tie-icon-add-button.icon-bubble .tui-image-editor-button[data-icontype=\"icon-bubble\"] label,\n    #tie-draw-line-select-button.line .tui-image-editor-button.line label,\n    #tie-draw-line-select-button.free .tui-image-editor-button.free label,\n    #tie-flip-button.flipX .tui-image-editor-button.flipX label,\n    #tie-flip-button.flipY .tui-image-editor-button.flipY label,\n    #tie-flip-button.resetFlip .tui-image-editor-button.resetFlip label,\n    #tie-crop-button .tui-image-editor-button.apply.active label,\n    #tie-shape-button.rect .tui-image-editor-button.rect label,\n    #tie-shape-button.circle .tui-image-editor-button.circle label,\n    #tie-shape-button.triangle .tui-image-editor-button.triangle label,\n    #tie-text-effect-button .tui-image-editor-button.active label,\n    #tie-text-align-button.left .tui-image-editor-button.left label,\n    #tie-text-align-button.center .tui-image-editor-button.center label,\n    #tie-text-align-button.right .tui-image-editor-button.right label,\n    #tie-mask-apply.apply.active .tui-image-editor-button.apply label,\n    .tui-image-editor-container .tui-image-editor-submenu .tui-image-editor-button:hover > label,\n    .tui-image-editor-container .tui-image-editor-checkbox input + label {\n        " + subMenuLabelActive + "\n    }\n    .tui-image-editor-container .tui-image-editor-submenu .tui-image-editor-button > label,\n    .tui-image-editor-container .tui-image-editor-range-wrap.tui-image-editor-newline.short label {\n        " + subMenuLabelNormal + "\n    }\n    .tui-image-editor-container .tui-image-editor-range-wrap label {\n        " + subMenuRangeTitle + "\n    }\n    .tui-image-editor-container .tui-image-editor-partition > div {\n        " + submenuPartitionVertical + "\n    }\n    .tui-image-editor-container.left .tui-image-editor-submenu .tui-image-editor-partition > div,\n    .tui-image-editor-container.right .tui-image-editor-submenu .tui-image-editor-partition > div {\n        " + submenuPartitionHorizontal + "\n    }\n    .tui-image-editor-container .tui-image-editor-checkbox input + label:before {\n        " + submenuCheckbox + "\n    }\n    .tui-image-editor-container .tui-image-editor-virtual-range-pointer {\n        " + submenuRangePointer + "\n    }\n    .tui-image-editor-container .tui-image-editor-virtual-range-bar {\n        " + submenuRangeBar + "\n    }\n    .tui-image-editor-container .tui-image-editor-virtual-range-subbar {\n        " + submenuRangeSubbar + "\n    }\n    .tui-image-editor-container .tui-image-editor-range-value {\n        " + submenuRangeValue + "\n    }\n    .tui-image-editor-container .tui-image-editor-submenu .tui-image-editor-button .color-picker-value + label {\n        " + submenuColorpickerTitle + "\n    }\n    .tui-image-editor-container .tui-image-editor-submenu .tui-image-editor-button .color-picker-value {\n        " + submenuColorpickerButton + "\n    }\n    .tui-image-editor-container .svg_ic-menu {\n        " + menuIconSize + "\n    }\n    .tui-image-editor-container .svg_ic-submenu {\n        " + submenuIconSize + "\n    }\n    .tui-image-editor-container .tui-image-editor-controls-logo > img,\n    .tui-image-editor-container .tui-image-editor-header-logo > img {\n        " + biSize + "\n    }\n\n";
+	    return "\n    #tie-icon-add-button.icon-bubble .tui-image-editor-button[data-icontype=\"icon-bubble\"] label,\n    #tie-icon-add-button.icon-heart .tui-image-editor-button[data-icontype=\"icon-heart\"] label,\n    #tie-icon-add-button.icon-location .tui-image-editor-button[data-icontype=\"icon-location\"] label,\n    #tie-icon-add-button.icon-polygon .tui-image-editor-button[data-icontype=\"icon-polygon\"] label,\n    #tie-icon-add-button.icon-star .tui-image-editor-button[data-icontype=\"icon-star\"] label,\n    #tie-icon-add-button.icon-star-2 .tui-image-editor-button[data-icontype=\"icon-star-2\"] label,\n    #tie-icon-add-button.icon-arrow-3 .tui-image-editor-button[data-icontype=\"icon-arrow-3\"] label,\n    #tie-icon-add-button.icon-arrow-2 .tui-image-editor-button[data-icontype=\"icon-arrow-2\"] label,\n    #tie-icon-add-button.icon-arrow .tui-image-editor-button[data-icontype=\"icon-arrow\"] label,\n    #tie-icon-add-button.icon-bubble .tui-image-editor-button[data-icontype=\"icon-bubble\"] label,\n    #tie-draw-line-select-button.line .tui-image-editor-button.line label,\n    #tie-draw-line-select-button.free .tui-image-editor-button.free label,\n    #tie-flip-button.flipX .tui-image-editor-button.flipX label,\n    #tie-flip-button.flipY .tui-image-editor-button.flipY label,\n    #tie-flip-button.resetFlip .tui-image-editor-button.resetFlip label,\n    #tie-crop-button .tui-image-editor-button.apply.active label,\n    #tie-crop-preset-button .tui-image-editor-button.preset.active label,\n    #tie-shape-button.rect .tui-image-editor-button.rect label,\n    #tie-shape-button.circle .tui-image-editor-button.circle label,\n    #tie-shape-button.triangle .tui-image-editor-button.triangle label,\n    #tie-text-effect-button .tui-image-editor-button.active label,\n    #tie-text-align-button.left .tui-image-editor-button.left label,\n    #tie-text-align-button.center .tui-image-editor-button.center label,\n    #tie-text-align-button.right .tui-image-editor-button.right label,\n    #tie-mask-apply.apply.active .tui-image-editor-button.apply label,\n    .tui-image-editor-container .tui-image-editor-submenu .tui-image-editor-button:hover > label,\n    .tui-image-editor-container .tui-image-editor-checkbox input + label {\n        " + subMenuLabelActive + "\n    }\n    .tui-image-editor-container .tui-image-editor-submenu .tui-image-editor-button > label,\n    .tui-image-editor-container .tui-image-editor-range-wrap.tui-image-editor-newline.short label {\n        " + subMenuLabelNormal + "\n    }\n    .tui-image-editor-container .tui-image-editor-range-wrap label {\n        " + subMenuRangeTitle + "\n    }\n    .tui-image-editor-container .tui-image-editor-partition > div {\n        " + submenuPartitionVertical + "\n    }\n    .tui-image-editor-container.left .tui-image-editor-submenu .tui-image-editor-partition > div,\n    .tui-image-editor-container.right .tui-image-editor-submenu .tui-image-editor-partition > div {\n        " + submenuPartitionHorizontal + "\n    }\n    .tui-image-editor-container .tui-image-editor-checkbox input + label:before {\n        " + submenuCheckbox + "\n    }\n    .tui-image-editor-container .tui-image-editor-checkbox input:checked + label:before {\n        border: 0;\n    }\n    .tui-image-editor-container .tui-image-editor-virtual-range-pointer {\n        " + submenuRangePointer + "\n    }\n    .tui-image-editor-container .tui-image-editor-virtual-range-bar {\n        " + submenuRangeBar + "\n    }\n    .tui-image-editor-container .tui-image-editor-virtual-range-subbar {\n        " + submenuRangeSubbar + "\n    }\n    .tui-image-editor-container .tui-image-editor-disabled .tui-image-editor-virtual-range-pointer {\n        " + submenuDisabledRangePointer + "\n    }\n    .tui-image-editor-container .tui-image-editor-disabled .tui-image-editor-virtual-range-subbar {\n        " + submenuDisabledRangeSubbar + "\n    }\n    .tui-image-editor-container .tui-image-editor-disabled .tui-image-editor-virtual-range-bar {\n        " + submenuDisabledRangeBar + "\n    }\n    .tui-image-editor-container .tui-image-editor-range-value {\n        " + submenuRangeValue + "\n    }\n    .tui-image-editor-container .tui-image-editor-submenu .tui-image-editor-button .color-picker-value + label {\n        " + submenuColorpickerTitle + "\n    }\n    .tui-image-editor-container .tui-image-editor-submenu .tui-image-editor-button .color-picker-value {\n        " + submenuColorpickerButton + "\n    }\n    .tui-image-editor-container .svg_ic-menu {\n        " + menuIconSize + "\n    }\n    .tui-image-editor-container .svg_ic-submenu {\n        " + submenuIconSize + "\n    }\n    .tui-image-editor-container .tui-image-editor-controls-logo > img,\n    .tui-image-editor-container .tui-image-editor-header-logo > img {\n        " + biSize + "\n    }\n\n";
 	};
 
 /***/ }),
@@ -5993,50 +6094,59 @@ return /******/ (function(modules) { // webpackBootstrap
 	  'loadButton.backgroundColor': '#fff',
 	  'loadButton.border': '1px solid #ddd',
 	  'loadButton.color': '#222',
-	  'loadButton.fontFamily': 'NotoSans, sans-serif',
+	  'loadButton.fontFamily': '\'Noto Sans\', sans-serif',
 	  'loadButton.fontSize': '12px',
 
 	  // download button
 	  'downloadButton.backgroundColor': '#fdba3b',
 	  'downloadButton.border': '1px solid #fdba3b',
 	  'downloadButton.color': '#fff',
-	  'downloadButton.fontFamily': 'NotoSans, sans-serif',
+	  'downloadButton.fontFamily': '\'Noto Sans\', sans-serif',
 	  'downloadButton.fontSize': '12px',
 
 	  // main icons
-	  'menu.normalIcon.path': 'icon-b.svg',
-	  'menu.normalIcon.name': 'icon-b',
-	  'menu.activeIcon.path': 'icon-a.svg',
-	  'menu.activeIcon.name': 'icon-a',
+	  'menu.normalIcon.path': 'icon-d.svg',
+	  'menu.normalIcon.name': 'icon-d',
+	  'menu.activeIcon.path': 'icon-b.svg',
+	  'menu.activeIcon.name': 'icon-b',
+	  'menu.disabledIcon.path': 'icon-a.svg',
+	  'menu.disabledIcon.name': 'icon-a',
+	  'menu.hoverIcon.path': 'icon-c.svg',
+	  'menu.hoverIcon.name': 'icon-c',
 	  'menu.iconSize.width': '24px',
 	  'menu.iconSize.height': '24px',
 
 	  // submenu primary color
-	  'submenu.backgroundColor': 'transparent',
-	  'submenu.partition.color': '#858585',
+	  'submenu.backgroundColor': '#1e1e1e',
+	  'submenu.partition.color': '#3c3c3c',
 
 	  // submenu icons
-	  'submenu.normalIcon.path': 'icon-a.svg',
-	  'submenu.normalIcon.name': 'icon-a',
+	  'submenu.normalIcon.path': 'icon-d.svg',
+	  'submenu.normalIcon.name': 'icon-d',
 	  'submenu.activeIcon.path': 'icon-c.svg',
 	  'submenu.activeIcon.name': 'icon-c',
 	  'submenu.iconSize.width': '32px',
 	  'submenu.iconSize.height': '32px',
 
 	  // submenu labels
-	  'submenu.normalLabel.color': '#858585',
+	  'submenu.normalLabel.color': '#8a8a8a',
 	  'submenu.normalLabel.fontWeight': 'lighter',
 	  'submenu.activeLabel.color': '#fff',
 	  'submenu.activeLabel.fontWeight': 'lighter',
 
 	  // checkbox style
-	  'checkbox.border': '1px solid #ccc',
+	  'checkbox.border': '0px',
 	  'checkbox.backgroundColor': '#fff',
 
-	  // rango style
+	  // range style
 	  'range.pointer.color': '#fff',
 	  'range.bar.color': '#666',
 	  'range.subbar.color': '#d1d1d1',
+
+	  'range.disabledPointer.color': '#414141',
+	  'range.disabledBar.color': '#282828',
+	  'range.disabledSubbar.color': '#414141',
+
 	  'range.value.color': '#fff',
 	  'range.value.fontWeight': 'lighter',
 	  'range.value.fontSize': '11px',
@@ -6106,12 +6216,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	    _inherits(Shape, _Submenu);
 
 	    function Shape(subMenuElement, _ref) {
-	        var iconStyle = _ref.iconStyle,
+	        var locale = _ref.locale,
+	            iconStyle = _ref.iconStyle,
 	            menuBarPosition = _ref.menuBarPosition;
 
 	        _classCallCheck(this, Shape);
 
 	        var _this = _possibleConstructorReturn(this, (Shape.__proto__ || Object.getPrototypeOf(Shape)).call(this, subMenuElement, {
+	            locale: locale,
 	            name: 'shape',
 	            iconStyle: iconStyle,
 	            menuBarPosition: menuBarPosition,
@@ -6129,6 +6241,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	            fillColorpicker: new _colorpicker2.default(_this.selector('#tie-color-fill'), '', _this.toggleDirection),
 	            strokeColorpicker: new _colorpicker2.default(_this.selector('#tie-color-stroke'), '#ffbb3b', _this.toggleDirection)
 	        };
+
+	        _this.colorPickerControls.push(_this._els.fillColorpicker);
+	        _this.colorPickerControls.push(_this._els.strokeColorpicker);
 	        return _this;
 	    }
 
@@ -6149,6 +6264,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	            this._els.strokeRange.on('change', this._changeStrokeRangeHandler.bind(this));
 	            this._els.fillColorpicker.on('change', this._changeFillColorHandler.bind(this));
 	            this._els.strokeColorpicker.on('change', this._changeStrokeColorHandler.bind(this));
+	            this._els.fillColorpicker.on('changeShow', this.colorPickerChangeShow.bind(this));
+	            this._els.strokeColorpicker.on('changeShow', this.colorPickerChangeShow.bind(this));
 	            this._els.strokeRangeValue.value = this._els.strokeRange.value;
 	            this._els.strokeRangeValue.setAttribute('readonly', true);
 	        }
@@ -6341,8 +6458,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _tuiCodeSnippet2 = _interopRequireDefault(_tuiCodeSnippet);
 
-	var _util = __webpack_require__(72);
-
 	var _tuiColorPicker = __webpack_require__(82);
 
 	var _tuiColorPicker2 = _interopRequireDefault(_tuiColorPicker);
@@ -6370,6 +6485,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        this._show = false;
 
+	        this._colorpickerElement = colorpickerElement;
 	        this._toggleDirection = toggleDirection;
 	        this._makePickerButtonElement(colorpickerElement, defaultColor);
 	        this._makePickerLayerElement(colorpickerElement, title);
@@ -6457,8 +6573,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	            colorpickerElement.appendChild(this.pickerControl);
 	            colorpickerElement.appendChild(this.colorElement);
 	            colorpickerElement.appendChild(label);
-
-	            this._setPickerControlPosition();
 	        }
 
 	        /**
@@ -6478,14 +6592,67 @@ return /******/ (function(modules) { // webpackBootstrap
 	                _this.fire('change', value.color);
 	            });
 	            colorpickerElement.addEventListener('click', function (event) {
-	                _this._show = !_this._show;
-	                _this.pickerControl.style.display = _this._show ? 'block' : 'none';
+	                var target = event.target;
+
+	                var isInPickerControl = target && _this._isElementInColorPickerControl(target);
+
+	                if (!isInPickerControl || isInPickerControl && _this._isPaletteButton(target)) {
+	                    _this._show = !_this._show;
+	                    _this.pickerControl.style.display = _this._show ? 'block' : 'none';
+	                    _this._setPickerControlPosition();
+	                    _this.fire('changeShow', _this);
+	                }
 	                event.stopPropagation();
 	            });
 	            document.body.addEventListener('click', function () {
-	                _this._show = false;
-	                _this.pickerControl.style.display = 'none';
+	                _this.hide();
 	            });
+	        }
+
+	        /**
+	         * Check hex input or not
+	         * @param {Element} target - Event target element
+	         * @returns {boolean}
+	         * @private
+	         */
+
+	    }, {
+	        key: '_isPaletteButton',
+	        value: function _isPaletteButton(target) {
+	            return target.className === 'tui-colorpicker-palette-button';
+	        }
+
+	        /**
+	         * Check given element is in pickerControl element
+	         * @param {Element} element - element to check
+	         * @returns {boolean}
+	         * @private
+	         */
+
+	    }, {
+	        key: '_isElementInColorPickerControl',
+	        value: function _isElementInColorPickerControl(element) {
+	            var parentNode = element;
+
+	            while (parentNode !== document.body) {
+	                if (!parentNode) {
+	                    break;
+	                }
+
+	                if (parentNode === this.pickerControl) {
+	                    return true;
+	                }
+
+	                parentNode = parentNode.parentNode;
+	            }
+
+	            return false;
+	        }
+	    }, {
+	        key: 'hide',
+	        value: function hide() {
+	            this._show = false;
+	            this.pickerControl.style.display = 'none';
 	        }
 
 	        /**
@@ -6497,8 +6664,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        key: '_setPickerControlPosition',
 	        value: function _setPickerControlPosition() {
 	            var controlStyle = this.pickerControl.style;
-	            var left = (0, _util.toInteger)(window.getComputedStyle(this.pickerControl, null).width) / 2 - 20;
-	            var top = ((0, _util.toInteger)(window.getComputedStyle(this.pickerControl, null).height) + 12) * -1;
+	            var halfPickerWidth = this._colorpickerElement.clientWidth / 2 + 2;
+	            var left = this.pickerControl.offsetWidth / 2 - halfPickerWidth;
+	            var top = (this.pickerControl.offsetHeight + 10) * -1;
 
 	            if (this._toggleDirection === 'down') {
 	                top = 30;
@@ -6532,3221 +6700,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ }),
 /* 82 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, exports) {
 
-	/*!
-	 * Toast UI Colorpicker
-	 * @version 2.2.0
-	 * @author NHNEnt FE Development Team <dl_javascript@nhnent.com>
-	 * @license MIT
-	 */
-	(function webpackUniversalModuleDefinition(root, factory) {
-		if(true)
-			module.exports = factory(__webpack_require__(3));
-		else if(typeof define === 'function' && define.amd)
-			define(["tui-code-snippet"], factory);
-		else if(typeof exports === 'object')
-			exports["colorPicker"] = factory(require("tui-code-snippet"));
-		else
-			root["tui"] = root["tui"] || {}, root["tui"]["colorPicker"] = factory((root["tui"] && root["tui"]["util"]));
-	})(this, function(__WEBPACK_EXTERNAL_MODULE_8__) {
-	return /******/ (function(modules) { // webpackBootstrap
-	/******/ 	// The module cache
-	/******/ 	var installedModules = {};
-
-	/******/ 	// The require function
-	/******/ 	function __webpack_require__(moduleId) {
-
-	/******/ 		// Check if module is in cache
-	/******/ 		if(installedModules[moduleId])
-	/******/ 			return installedModules[moduleId].exports;
-
-	/******/ 		// Create a new module (and put it into the cache)
-	/******/ 		var module = installedModules[moduleId] = {
-	/******/ 			exports: {},
-	/******/ 			id: moduleId,
-	/******/ 			loaded: false
-	/******/ 		};
-
-	/******/ 		// Execute the module function
-	/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
-
-	/******/ 		// Flag the module as loaded
-	/******/ 		module.loaded = true;
-
-	/******/ 		// Return the exports of the module
-	/******/ 		return module.exports;
-	/******/ 	}
-
-
-	/******/ 	// expose the modules object (__webpack_modules__)
-	/******/ 	__webpack_require__.m = modules;
-
-	/******/ 	// expose the module cache
-	/******/ 	__webpack_require__.c = installedModules;
-
-	/******/ 	// __webpack_public_path__
-	/******/ 	__webpack_require__.p = "dist";
-
-	/******/ 	// Load entry module and return exports
-	/******/ 	return __webpack_require__(0);
-	/******/ })
-	/************************************************************************/
-	/******/ ([
-	/* 0 */
-	/***/ (function(module, exports, __webpack_require__) {
-
-		__webpack_require__(1);
-		module.exports = __webpack_require__(6);
-
-
-	/***/ }),
-	/* 1 */
-	/***/ (function(module, exports) {
-
-		// removed by extract-text-webpack-plugin
-
-	/***/ }),
-	/* 2 */,
-	/* 3 */,
-	/* 4 */,
-	/* 5 */,
-	/* 6 */
-	/***/ (function(module, exports, __webpack_require__) {
-
-		'use strict';
-
-		var domutil = __webpack_require__(7);
-		var domevent = __webpack_require__(9);
-		var Collection = __webpack_require__(10);
-		var View = __webpack_require__(11);
-		var Drag = __webpack_require__(12);
-		var create = __webpack_require__(13);
-		var Palette = __webpack_require__(16);
-		var Slider = __webpack_require__(18);
-		var colorutil = __webpack_require__(14);
-		var svgvml = __webpack_require__(19);
-
-		var colorPicker = {
-		    domutil: domutil,
-		    domevent: domevent,
-		    Collection: Collection,
-		    View: View,
-		    Drag: Drag,
-
-		    create: create,
-		    Palette: Palette,
-		    Slider: Slider,
-		    colorutil: colorutil,
-		    svgvml: svgvml
-		};
-
-		module.exports = colorPicker;
-
-	/***/ }),
-	/* 7 */
-	/***/ (function(module, exports, __webpack_require__) {
-
-		/**
-		 * @fileoverview Utility modules for manipulate DOM elements.
-		 * @author NHN Ent. FE Development Team <dl_javascript@nhnent.com>
-		 */
-
-		'use strict';
-
-		var snippet = __webpack_require__(8);
-		var domevent = __webpack_require__(9);
-		var Collection = __webpack_require__(10);
-
-		var util = snippet,
-		    posKey = '_pos',
-		    supportSelectStart = 'onselectstart' in document,
-		    prevSelectStyle = '',
-		    domutil,
-		    userSelectProperty;
-
-		var CSS_AUTO_REGEX = /^auto$|^$|%/;
-
-		function trim(str) {
-		    return str.replace(/^\s\s*/, '').replace(/\s\s*$/, '');
-		}
-
-		domutil = {
-		    /**
-		     * Create DOM element and return it.
-		     * @param {string} tagName Tag name to append.
-		     * @param {HTMLElement} [container] HTML element will be parent to created element.
-		     * if not supplied, will use **document.body**
-		     * @param {string} [className] Design class names to appling created element.
-		     * @returns {HTMLElement} HTML element created.
-		     */
-		    appendHTMLElement: function (tagName, container, className) {
-		        var el;
-
-		        className = className || '';
-
-		        el = document.createElement(tagName);
-		        el.className = className;
-
-		        if (container) {
-		            container.appendChild(el);
-		        } else {
-		            document.body.appendChild(el);
-		        }
-
-		        return el;
-		    },
-
-		    /**
-		     * Remove element from parent node.
-		     * @param {HTMLElement} el - element to remove.
-		     */
-		    remove: function (el) {
-		        if (el && el.parentNode) {
-		            el.parentNode.removeChild(el);
-		        }
-		    },
-
-		    /**
-		     * Get element by id
-		     * @param {string} id element id attribute
-		     * @returns {HTMLElement} element
-		     */
-		    get: function (id) {
-		        return document.getElementById(id);
-		    },
-
-		    /**
-		     * Check supplied element is matched selector.
-		     * @param {HTMLElement} el - element to check
-		     * @param {string} selector - selector string to check
-		     * @returns {boolean} match?
-		     */
-		    _matcher: function (el, selector) {
-		        var cssClassSelector = /^\./,
-		            idSelector = /^#/;
-
-		        if (cssClassSelector.test(selector)) {
-		            return domutil.hasClass(el, selector.replace('.', ''));
-		        } else if (idSelector.test(selector)) {
-		            return el.id === selector.replace('#', '');
-		        }
-
-		        return el.nodeName.toLowerCase() === selector.toLowerCase();
-		    },
-
-		    /**
-		     * Find DOM element by specific selectors.
-		     * below three selector only supported.
-		     *
-		     * 1. css selector
-		     * 2. id selector
-		     * 3. nodeName selector
-		     * @param {string} selector selector
-		     * @param {(HTMLElement|string)} [root] You can assign root element to find. if not supplied, document.body will use.
-		     * @param {boolean|function} [multiple=false] - set true then return all elements that meet condition, if set function then use it filter function.
-		     * @returns {HTMLElement} HTML element finded.
-		     */
-		    find: function (selector, root, multiple) {
-		        var result = [],
-		            found = false,
-		            isFirst = util.isUndefined(multiple) || multiple === false,
-		            isFilter = util.isFunction(multiple);
-
-		        if (util.isString(root)) {
-		            root = domutil.get(root);
-		        }
-
-		        root = root || window.document.body;
-
-		        function recurse(el, selector) {
-		            var childNodes = el.childNodes,
-		                i = 0,
-		                len = childNodes.length,
-		                cursor;
-
-		            for (; i < len; i += 1) {
-		                cursor = childNodes[i];
-
-		                if (cursor.nodeName === '#text') {
-		                    continue;
-		                }
-
-		                if (domutil._matcher(cursor, selector)) {
-		                    if (isFilter && multiple(cursor) || !isFilter) {
-		                        result.push(cursor);
-		                    }
-
-		                    if (isFirst) {
-		                        found = true;
-		                        break;
-		                    }
-		                } else if (cursor.childNodes.length > 0) {
-		                    recurse(cursor, selector);
-		                    if (found) {
-		                        break;
-		                    }
-		                }
-		            }
-		        }
-
-		        recurse(root, selector);
-
-		        return isFirst ? result[0] || null : result;
-		    },
-
-		    /**
-		     * Find parent element recursively.
-		     * @param {HTMLElement} el - base element to start find.
-		     * @param {string} selector - selector string for find
-		     * @returns {HTMLElement} - element finded or undefined.
-		     */
-		    closest: function (el, selector) {
-		        var parent = el.parentNode;
-
-		        if (domutil._matcher(el, selector)) {
-		            return el;
-		        }
-
-		        while (parent && parent !== window.document.body) {
-		            if (domutil._matcher(parent, selector)) {
-		                return parent;
-		            }
-
-		            parent = parent.parentNode;
-		        }
-		    },
-
-		    /**
-		     * Return texts inside element.
-		     * @param {HTMLElement} el target element
-		     * @returns {string} text inside node
-		     */
-		    text: function (el) {
-		        var ret = '',
-		            i = 0,
-		            nodeType = el.nodeType;
-
-		        if (nodeType) {
-		            if (nodeType === 1 || nodeType === 9 || nodeType === 11) {
-		                // nodes that available contain other nodes
-		                if (typeof el.textContent === 'string') {
-		                    return el.textContent;
-		                }
-
-		                for (el = el.firstChild; el; el = el.nextSibling) {
-		                    ret += domutil.text(el);
-		                }
-		            } else if (nodeType === 3 || nodeType === 4) {
-		                // TEXT, CDATA SECTION
-		                return el.nodeValue;
-		            }
-		        } else {
-		            for (; el[i]; i += 1) {
-		                ret += domutil.text(el[i]);
-		            }
-		        }
-
-		        return ret;
-		    },
-
-		    /**
-		     * Set data attribute to target element
-		     * @param {HTMLElement} el - element to set data attribute
-		     * @param {string} key - key
-		     * @param {string|number} data - data value
-		     */
-		    setData: function (el, key, data) {
-		        if ('dataset' in el) {
-		            el.dataset[key] = data;
-
-		            return;
-		        }
-
-		        el.setAttribute('data-' + key, data);
-		    },
-
-		    /**
-		     * Get data value from data-attribute
-		     * @param {HTMLElement} el - target element
-		     * @param {string} key - key
-		     * @returns {string} value
-		     */
-		    getData: function (el, key) {
-		        if ('dataset' in el) {
-		            return el.dataset[key];
-		        }
-
-		        return el.getAttribute('data-' + key);
-		    },
-
-		    /**
-		     * Check element has specific design class name.
-		     * @param {HTMLElement} el target element
-		     * @param {string} name css class
-		     * @returns {boolean} return true when element has that css class name
-		     */
-		    hasClass: function (el, name) {
-		        var className;
-
-		        if (!util.isUndefined(el.classList)) {
-		            return el.classList.contains(name);
-		        }
-
-		        className = domutil.getClass(el);
-
-		        return className.length > 0 && new RegExp('(^|\\s)' + name + '(\\s|$)').test(className);
-		    },
-
-		    /**
-		     * Add design class to HTML element.
-		     * @param {HTMLElement} el target element
-		     * @param {string} name css class name
-		     */
-		    addClass: function (el, name) {
-		        var className;
-
-		        if (!util.isUndefined(el.classList)) {
-		            util.forEachArray(name.split(' '), function (value) {
-		                el.classList.add(value);
-		            });
-		        } else if (!domutil.hasClass(el, name)) {
-		            className = domutil.getClass(el);
-		            domutil.setClass(el, (className ? className + ' ' : '') + name);
-		        }
-		    },
-
-		    /**
-		     *
-		     * Overwrite design class to HTML element.
-		     * @param {HTMLElement} el target element
-		     * @param {string} name css class name
-		     */
-		    setClass: function (el, name) {
-		        if (util.isUndefined(el.className.baseVal)) {
-		            el.className = name;
-		        } else {
-		            el.className.baseVal = name;
-		        }
-		    },
-
-		    /**
-		     * Element에 cssClass속성을 제거하는 메서드
-		     * Remove specific design class from HTML element.
-		     * @param {HTMLElement} el target element
-		     * @param {string} name class name to remove
-		     */
-		    removeClass: function (el, name) {
-		        var removed = '';
-
-		        if (!util.isUndefined(el.classList)) {
-		            el.classList.remove(name);
-		        } else {
-		            removed = (' ' + domutil.getClass(el) + ' ').replace(' ' + name + ' ', ' ');
-		            domutil.setClass(el, trim(removed));
-		        }
-		    },
-
-		    /**
-		     * Get HTML element's design classes.
-		     * @param {HTMLElement} el target element
-		     * @returns {string} element css class name
-		     */
-		    getClass: function (el) {
-		        if (!el || !el.className) {
-		            return '';
-		        }
-
-		        return util.isUndefined(el.className.baseVal) ? el.className : el.className.baseVal;
-		    },
-
-		    /**
-		     * Get specific CSS style value from HTML element.
-		     * @param {HTMLElement} el target element
-		     * @param {string} style css attribute name
-		     * @returns {(string|null)} css style value
-		     */
-		    getStyle: function (el, style) {
-		        var value = el.style[style] || el.currentStyle && el.currentStyle[style],
-		            css;
-
-		        if ((!value || value === 'auto') && document.defaultView) {
-		            css = document.defaultView.getComputedStyle(el, null);
-		            value = css ? css[style] : null;
-		        }
-
-		        return value === 'auto' ? null : value;
-		    },
-
-		    /**
-		     * get element's computed style values.
-		     *
-		     * in lower IE8. use polyfill function that return object. it has only one function 'getPropertyValue'
-		     * @param {HTMLElement} el - element want to get style.
-		     * @returns {object} virtual CSSStyleDeclaration object.
-		     */
-		    getComputedStyle: function (el) {
-		        var defaultView = document.defaultView;
-
-		        if (!defaultView || !defaultView.getComputedStyle) {
-		            return {
-		                getPropertyValue: function (prop) {
-		                    var re = /(\-([a-z]){1})/g;
-		                    if (prop === 'float') {
-		                        prop = 'styleFloat';
-		                    }
-
-		                    if (re.test(prop)) {
-		                        prop = prop.replace(re, function () {
-		                            return arguments[2].toUpperCase();
-		                        });
-		                    }
-
-		                    return el.currentStyle[prop] ? el.currentStyle[prop] : null;
-		                }
-		            };
-		        }
-
-		        return document.defaultView.getComputedStyle(el);
-		    },
-
-		    /**
-		     * Set position CSS style.
-		     * @param {HTMLElement} el target element
-		     * @param {number} [x=0] left pixel value.
-		     * @param {number} [y=0] top pixel value.
-		     */
-		    setPosition: function (el, x, y) {
-		        x = util.isUndefined(x) ? 0 : x;
-		        y = util.isUndefined(y) ? 0 : y;
-
-		        el[posKey] = [x, y];
-
-		        el.style.left = x + 'px';
-		        el.style.top = y + 'px';
-		    },
-
-		    /**
-		     * Get position from HTML element.
-		     * @param {HTMLElement} el target element
-		     * @param {boolean} [clear=false] clear cache before calculating position.
-		     * @returns {number[]} point
-		     */
-		    getPosition: function (el, clear) {
-		        var left, top, bound;
-
-		        if (clear) {
-		            el[posKey] = null;
-		        }
-
-		        if (el[posKey]) {
-		            return el[posKey];
-		        }
-
-		        left = 0;
-		        top = 0;
-
-		        if ((CSS_AUTO_REGEX.test(el.style.left) || CSS_AUTO_REGEX.test(el.style.top)) && 'getBoundingClientRect' in el) {
-		            // 엘리먼트의 left또는 top이 'auto'일 때 수단
-		            bound = el.getBoundingClientRect();
-
-		            left = bound.left;
-		            top = bound.top;
-		        } else {
-		            left = parseFloat(el.style.left || 0);
-		            top = parseFloat(el.style.top || 0);
-		        }
-
-		        return [left, top];
-		    },
-
-		    /**
-		     * Return element's size
-		     * @param {HTMLElement} el target element
-		     * @returns {number[]} width, height
-		     */
-		    getSize: function (el) {
-		        var bound,
-		            width = domutil.getStyle(el, 'width'),
-		            height = domutil.getStyle(el, 'height');
-
-		        if ((CSS_AUTO_REGEX.test(width) || CSS_AUTO_REGEX.test(height)) && 'getBoundingClientRect' in el) {
-		            bound = el.getBoundingClientRect();
-		            width = bound.width;
-		            height = bound.height;
-		        } else {
-		            width = parseFloat(width || 0);
-		            height = parseFloat(height || 0);
-		        }
-
-		        return [width, height];
-		    },
-
-		    /**
-		     * Check specific CSS style is available.
-		     * @param {array} props property name to testing
-		     * @returns {(string|boolean)} return true when property is available
-		     * @example
-		     * var props = ['transform', '-webkit-transform'];
-		     * domutil.testProp(props);    // 'transform'
-		     */
-		    testProp: function (props) {
-		        var style = document.documentElement.style,
-		            i = 0,
-		            len = props.length;
-
-		        for (; i < len; i += 1) {
-		            if (props[i] in style) {
-		                return props[i];
-		            }
-		        }
-
-		        return false;
-		    },
-
-		    /**
-		     * Get form data
-		     * @param {HTMLFormElement} formElement - form element to extract data
-		     * @returns {object} form data
-		     */
-		    getFormData: function (formElement) {
-		        var groupedByName = new Collection(function () {
-		            return this.length;
-		        }),
-		            noDisabledFilter = function (el) {
-		            return !el.disabled;
-		        },
-		            output = {};
-
-		        groupedByName.add.apply(groupedByName, domutil.find('input', formElement, noDisabledFilter).concat(domutil.find('select', formElement, noDisabledFilter)).concat(domutil.find('textarea', formElement, noDisabledFilter)));
-
-		        groupedByName = groupedByName.groupBy(function (el) {
-		            return el && el.getAttribute('name') || '_other';
-		        });
-
-		        util.forEach(groupedByName, function (elements, name) {
-		            if (name === '_other') {
-		                return;
-		            }
-
-		            elements.each(function (el) {
-		                var nodeName = el.nodeName.toLowerCase(),
-		                    type = el.type,
-		                    result = [];
-
-		                if (type === 'radio') {
-		                    result = [elements.find(function (el) {
-		                        return el.checked;
-		                    }).toArray().pop()];
-		                } else if (type === 'checkbox') {
-		                    result = elements.find(function (el) {
-		                        return el.checked;
-		                    }).toArray();
-		                } else if (nodeName === 'select') {
-		                    elements.find(function (el) {
-		                        return !!el.childNodes.length;
-		                    }).each(function (el) {
-		                        result = result.concat(domutil.find('option', el, function (opt) {
-		                            return opt.selected;
-		                        }));
-		                    });
-		                } else {
-		                    result = elements.find(function (el) {
-		                        return el.value !== '';
-		                    }).toArray();
-		                }
-
-		                result = util.map(result, function (el) {
-		                    return el.value;
-		                });
-
-		                if (!result.length) {
-		                    result = '';
-		                } else if (result.length === 1) {
-		                    result = result[0];
-		                }
-
-		                output[name] = result;
-		            });
-		        });
-
-		        return output;
-		    }
-		};
-
-		userSelectProperty = domutil.testProp(['userSelect', 'WebkitUserSelect', 'OUserSelect', 'MozUserSelect', 'msUserSelect']);
-
-		/**
-		 * Disable browser's text selection behaviors.
-		 * @method
-		 */
-		domutil.disableTextSelection = function () {
-		    if (supportSelectStart) {
-		        return function () {
-		            domevent.on(window, 'selectstart', domevent.preventDefault);
-		        };
-		    }
-
-		    return function () {
-		        var style = document.documentElement.style;
-		        prevSelectStyle = style[userSelectProperty];
-		        style[userSelectProperty] = 'none';
-		    };
-		}();
-
-		/**
-		 * Enable browser's text selection behaviors.
-		 * @method
-		 */
-		domutil.enableTextSelection = function () {
-		    if (supportSelectStart) {
-		        return function () {
-		            domevent.off(window, 'selectstart', domevent.preventDefault);
-		        };
-		    }
-
-		    return function () {
-		        document.documentElement.style[userSelectProperty] = prevSelectStyle;
-		    };
-		}();
-
-		/**
-		 * Disable browser's image drag behaviors.
-		 */
-		domutil.disableImageDrag = function () {
-		    domevent.on(window, 'dragstart', domevent.preventDefault);
-		};
-
-		/**
-		 * Enable browser's image drag behaviors.
-		 */
-		domutil.enableImageDrag = function () {
-		    domevent.off(window, 'dragstart', domevent.preventDefault);
-		};
-
-		/**
-		 * Replace matched property with template
-		 * @param {string} template - String of template
-		 * @param {Object} propObj - Properties
-		 * @returns {string} Replaced template string
-		 */
-		domutil.applyTemplate = function (template, propObj) {
-		    var newTemplate = template.replace(/\{\{(\w*)\}\}/g, function (value, prop) {
-		        return propObj.hasOwnProperty(prop) ? propObj[prop] : '';
-		    });
-
-		    return newTemplate;
-		};
-
-		module.exports = domutil;
-
-	/***/ }),
-	/* 8 */
-	/***/ (function(module, exports) {
-
-		module.exports = __WEBPACK_EXTERNAL_MODULE_8__;
-
-	/***/ }),
-	/* 9 */
-	/***/ (function(module, exports, __webpack_require__) {
-
-		/**
-		 * @fileoverview Utility module for handling DOM events.
-		 * @author NHN Ent. FE Development Team <dl_javascript@nhnent.com>
-		 */
-
-		'use strict';
-
-		var snippet = __webpack_require__(8);
-
-		var util = snippet,
-		    browser = util.browser,
-		    eventKey = '_evt',
-		    DRAG = {
-		    START: ['touchstart', 'mousedown'],
-		    END: {
-		        mousedown: 'mouseup',
-		        touchstart: 'touchend',
-		        pointerdown: 'touchend',
-		        MSPointerDown: 'touchend'
-		    },
-		    MOVE: {
-		        mousedown: 'mousemove',
-		        touchstart: 'touchmove',
-		        pointerdown: 'touchmove',
-		        MSPointerDown: 'touchmove'
-		    }
-		};
-
-		var domevent = {
-		    /**
-		     * Bind dom events.
-		     * @param {HTMLElement} obj HTMLElement to bind events.
-		     * @param {(string|object)} types Space splitted events names or eventName:handler object.
-		     * @param {*} fn handler function or context for handler method.
-		     * @param {*} [context] context object for handler method.
-		     */
-		    on: function (obj, types, fn, context) {
-		        if (util.isString(types)) {
-		            util.forEach(types.split(' '), function (type) {
-		                domevent._on(obj, type, fn, context);
-		            });
-
-		            return;
-		        }
-
-		        util.forEachOwnProperties(types, function (handler, type) {
-		            domevent._on(obj, type, handler, fn);
-		        });
-		    },
-
-		    /**
-		     * DOM event binding.
-		     * @param {HTMLElement} obj HTMLElement to bind events.
-		     * @param {String} type The name of events.
-		     * @param {*} fn handler function
-		     * @param {*} [context] context object for handler method.
-		     * @private
-		     */
-		    _on: function (obj, type, fn, context) {
-		        var id, handler, originHandler;
-
-		        id = type + util.stamp(fn) + (context ? '_' + util.stamp(context) : '');
-
-		        if (obj[eventKey] && obj[eventKey][id]) {
-		            return;
-		        }
-
-		        handler = function (e) {
-		            fn.call(context || obj, e || window.event);
-		        };
-
-		        originHandler = handler;
-
-		        if ('addEventListener' in obj) {
-		            if (type === 'mouseenter' || type === 'mouseleave') {
-		                handler = function (e) {
-		                    e = e || window.event;
-		                    if (!domevent._checkMouse(obj, e)) {
-		                        return;
-		                    }
-		                    originHandler(e);
-		                };
-		                obj.addEventListener(type === 'mouseenter' ? 'mouseover' : 'mouseout', handler, false);
-		            } else {
-		                if (type === 'mousewheel') {
-		                    obj.addEventListener('DOMMouseScroll', handler, false);
-		                }
-
-		                obj.addEventListener(type, handler, false);
-		            }
-		        } else if ('attachEvent' in obj) {
-		            obj.attachEvent('on' + type, handler);
-		        }
-
-		        obj[eventKey] = obj[eventKey] || {};
-		        obj[eventKey][id] = handler;
-		    },
-
-		    /**
-		     * Unbind DOM Event handler.
-		     * @param {HTMLElement} obj HTMLElement to unbind.
-		     * @param {(string|object)} types Space splitted events names or eventName:handler object.
-		     * @param {*} fn handler function or context for handler method.
-		     * @param {*} [context] context object for handler method.
-		     */
-		    off: function (obj, types, fn, context) {
-		        if (util.isString(types)) {
-		            util.forEach(types.split(' '), function (type) {
-		                domevent._off(obj, type, fn, context);
-		            });
-
-		            return;
-		        }
-
-		        util.forEachOwnProperties(types, function (handler, type) {
-		            domevent._off(obj, type, handler, fn);
-		        });
-		    },
-
-		    /**
-		     * Unbind DOM event handler.
-		     * @param {HTMLElement} obj HTMLElement to unbind.
-		     * @param {String} type The name of event to unbind.
-		     * @param {function()} fn Event handler that supplied when binding.
-		     * @param {*} context context object that supplied when binding.
-		     * @private
-		     */
-		    _off: function (obj, type, fn, context) {
-		        var id = type + util.stamp(fn) + (context ? '_' + util.stamp(context) : ''),
-		            handler = obj[eventKey] && obj[eventKey][id];
-
-		        if (!handler) {
-		            return;
-		        }
-
-		        if ('removeEventListener' in obj) {
-		            if (type === 'mouseenter' || type === 'mouseleave') {
-		                obj.removeEventListener(type === 'mouseenter' ? 'mouseover' : 'mouseout', handler, false);
-		            } else {
-		                if (type === 'mousewheel') {
-		                    obj.removeEventListener('DOMMouseScroll', handler, false);
-		                }
-
-		                obj.removeEventListener(type, handler, false);
-		            }
-		        } else if ('detachEvent' in obj) {
-		            try {
-		                obj.detachEvent('on' + type, handler);
-		            } catch (e) {} //eslint-disable-line
-		        }
-
-		        delete obj[eventKey][id];
-
-		        if (util.keys(obj[eventKey]).length) {
-		            return;
-		        }
-
-		        // throw exception when deleting host object's property in below IE8
-		        if (util.browser.msie && util.browser.version < 9) {
-		            obj[eventKey] = null;
-
-		            return;
-		        }
-
-		        delete obj[eventKey];
-		    },
-
-		    /**
-		     * Bind DOM event. this event will unbind after invokes.
-		     * @param {HTMLElement} obj HTMLElement to bind events.
-		     * @param {(string|object)} types Space splitted events names or eventName:handler object.
-		     * @param {*} fn handler function or context for handler method.
-		     * @param {*} [context] context object for handler method.
-		     */
-		    once: function (obj, types, fn, context) {
-		        var that = this;
-
-		        if (util.isObject(types)) {
-		            util.forEachOwnProperties(types, function (handler, type) {
-		                domevent.once(obj, type, handler, fn);
-		            });
-
-		            return;
-		        }
-
-		        function onceHandler() {
-		            fn.apply(context || obj, arguments);
-		            that._off(obj, types, onceHandler, context);
-		        }
-
-		        domevent.on(obj, types, onceHandler, context);
-		    },
-
-		    /**
-		     * Cancel event bubbling.
-		     * @param {Event} e Event object.
-		     */
-		    stopPropagation: function (e) {
-		        if (e.stopPropagation) {
-		            e.stopPropagation();
-		        } else {
-		            e.cancelBubble = true;
-		        }
-		    },
-
-		    /**
-		     * Cancel browser default actions.
-		     * @param {Event} e Event object.
-		     */
-		    preventDefault: function (e) {
-		        if (e.preventDefault) {
-		            e.preventDefault();
-		        } else {
-		            e.returnValue = false;
-		        }
-		    },
-
-		    /**
-		     * Syntatic sugar of stopPropagation and preventDefault
-		     * @param {Event} e Event object.
-		     */
-		    stop: function (e) {
-		        domevent.preventDefault(e);
-		        domevent.stopPropagation(e);
-		    },
-
-		    /**
-		     * Stop scroll events.
-		     * @param {HTMLElement} el HTML element to prevent scroll.
-		     */
-		    disableScrollPropagation: function (el) {
-		        domevent.on(el, 'mousewheel MozMousePixelScroll', domevent.stopPropagation);
-		    },
-
-		    /**
-		     * Stop all events related with click.
-		     * @param {HTMLElement} el HTML element to prevent all event related with click.
-		     */
-		    disableClickPropagation: function (el) {
-		        domevent.on(el, DRAG.START.join(' ') + ' click dblclick', domevent.stopPropagation);
-		    },
-
-		    /**
-		     * Get mouse position from mouse event.
-		     *
-		     * If supplied relatveElement parameter then return relative position based on element.
-		     * @param {Event} mouseEvent Mouse event object
-		     * @param {HTMLElement} relativeElement HTML element that calculate relative position.
-		     * @returns {number[]} mouse position.
-		     */
-		    getMousePosition: function (mouseEvent, relativeElement) {
-		        var rect;
-
-		        if (!relativeElement) {
-		            return [mouseEvent.clientX, mouseEvent.clientY];
-		        }
-
-		        rect = relativeElement.getBoundingClientRect();
-
-		        return [mouseEvent.clientX - rect.left - relativeElement.clientLeft, mouseEvent.clientY - rect.top - relativeElement.clientTop];
-		    },
-
-		    /**
-		     * Normalize mouse wheel event that different each browsers.
-		     * @param {MouseEvent} e Mouse wheel event.
-		     * @returns {Number} delta
-		     */
-		    getWheelDelta: function (e) {
-		        var delta = 0;
-
-		        if (e.wheelDelta) {
-		            delta = e.wheelDelta / 120;
-		        }
-
-		        if (e.detail) {
-		            delta = -e.detail / 3;
-		        }
-
-		        return delta;
-		    },
-
-		    /**
-		     * prevent firing mouseleave event when mouse entered child elements.
-		     * @param {HTMLElement} el HTML element
-		     * @param {MouseEvent} e Mouse event
-		     * @returns {Boolean} leave?
-		     * @private
-		     */
-		    _checkMouse: function (el, e) {
-		        var related = e.relatedTarget;
-
-		        if (!related) {
-		            return true;
-		        }
-
-		        try {
-		            while (related && related !== el) {
-		                related = related.parentNode;
-		            }
-		        } catch (err) {
-		            return false;
-		        }
-
-		        return related !== el;
-		    },
-
-		    /**
-		     * Trigger specific events to html element.
-		     * @param {HTMLElement} obj HTMLElement
-		     * @param {string} type Event type name
-		     * @param {object} [eventData] Event data
-		     */
-		    trigger: function (obj, type, eventData) {
-		        var rMouseEvent = /(mouse|click)/;
-		        if (util.isUndefined(eventData) && rMouseEvent.exec(type)) {
-		            eventData = domevent.mouseEvent(type);
-		        }
-
-		        if (obj.dispatchEvent) {
-		            obj.dispatchEvent(eventData);
-		        } else if (obj.fireEvent) {
-		            obj.fireEvent('on' + type, eventData);
-		        }
-		    },
-
-		    /**
-		     * Create virtual mouse event.
-		     *
-		     * Tested at
-		     *
-		     * - IE7 ~ IE11
-		     * - Chrome
-		     * - Firefox
-		     * - Safari
-		     * @param {string} type Event type
-		     * @param {object} [eventObj] Event data
-		     * @returns {MouseEvent} Virtual mouse event.
-		     */
-		    mouseEvent: function (type, eventObj) {
-		        var evt, e;
-
-		        e = util.extend({
-		            bubbles: true,
-		            cancelable: type !== 'mousemove',
-		            view: window,
-		            wheelDelta: 0,
-		            detail: 0,
-		            screenX: 0,
-		            screenY: 0,
-		            clientX: 0,
-		            clientY: 0,
-		            ctrlKey: false,
-		            altKey: false,
-		            shiftKey: false,
-		            metaKey: false,
-		            button: 0,
-		            relatedTarget: undefined // eslint-disable-line
-		        }, eventObj);
-
-		        // prevent throw error when inserting wheelDelta property to mouse event on below IE8
-		        if (browser.msie && browser.version < 9) {
-		            delete e.wheelDelta;
-		        }
-
-		        if (typeof document.createEvent === 'function') {
-		            evt = document.createEvent('MouseEvents');
-		            evt.initMouseEvent(type, e.bubbles, e.cancelable, e.view, e.detail, e.screenX, e.screenY, e.clientX, e.clientY, e.ctrlKey, e.altKey, e.shiftKey, e.metaKey, e.button, document.body.parentNode);
-		        } else if (document.createEventObject) {
-		            evt = document.createEventObject();
-
-		            util.forEach(e, function (value, propName) {
-		                evt[propName] = value;
-		            }, this);
-		            evt.button = {
-		                0: 1,
-		                1: 4,
-		                2: 2
-		            }[evt.button] || evt.button;
-		        }
-
-		        return evt;
-		    },
-
-		    /**
-		     * Normalize mouse event's button attributes.
-		     *
-		     * Can detect which button is clicked by this method.
-		     *
-		     * Meaning of return numbers
-		     *
-		     * - 0: primary mouse button
-		     * - 1: wheel button or center button
-		     * - 2: secondary mouse button
-		     * @param {MouseEvent} mouseEvent - The mouse event object want to know.
-		     * @returns {number} - The value of meaning which button is clicked?
-		     */
-		    getMouseButton: function (mouseEvent) {
-		        var button,
-		            primary = '0,1,3,5,7',
-		            secondary = '2,6',
-		            wheel = '4';
-
-		        /* istanbul ignore else */
-		        if (document.implementation.hasFeature('MouseEvents', '2.0')) {
-		            return mouseEvent.button;
-		        }
-
-		        button = mouseEvent.button + '';
-		        if (~primary.indexOf(button)) {
-		            return 0;
-		        } else if (~secondary.indexOf(button)) {
-		            return 2;
-		        } else if (~wheel.indexOf(button)) {
-		            return 1;
-		        }
-		    }
-		};
-
-		module.exports = domevent;
-
-	/***/ }),
-	/* 10 */
-	/***/ (function(module, exports, __webpack_require__) {
-
-		/**
-		 * @fileoverview Common collections.
-		 * @author NHN Ent. FE Development Team <dl_javascript@nhnent.com>
-		 */
-
-		'use strict';
-
-		var snippet = __webpack_require__(8);
-
-		var util = snippet,
-		    forEachProp = util.forEachOwnProperties,
-		    forEachArr = util.forEachArray,
-		    isFunc = util.isFunction,
-		    isObj = util.isObject;
-
-		var aps = Array.prototype.slice;
-
-		/**
-		 * Common collection.
-		 *
-		 * It need function for get model's unique id.
-		 *
-		 * if the function is not supplied then it use default function {@link Collection#getItemID}
-		 * @constructor
-		 * @param {function} [getItemIDFn] function for get model's id.
-		 * @ignore
-		 */
-		function Collection(getItemIDFn) {
-		    /**
-		     * @type {object.<string, *>}
-		     */
-		    this.items = {};
-
-		    /**
-		     * @type {number}
-		     */
-		    this.length = 0;
-
-		    if (isFunc(getItemIDFn)) {
-		        /**
-		         * @type {function}
-		         */
-		        this.getItemID = getItemIDFn;
-		    }
-		}
-
-		/**********
-		 * static props
-		 **********/
-
-		/**
-		 * Combind supplied function filters and condition.
-		 * @param {...function} filters - function filters
-		 * @returns {function} combined filter
-		 */
-		Collection.and = function (filters) {
-		    var cnt;
-
-		    filters = aps.call(arguments);
-		    cnt = filters.length;
-
-		    return function (item) {
-		        var i = 0;
-
-		        for (; i < cnt; i += 1) {
-		            if (!filters[i].call(null, item)) {
-		                return false;
-		            }
-		        }
-
-		        return true;
-		    };
-		};
-
-		/**
-		 * Combine multiple function filters with OR clause.
-		 * @param {...function} filters - function filters
-		 * @returns {function} combined filter
-		 */
-		Collection.or = function (filters) {
-		    var cnt;
-
-		    filters = aps.call(arguments);
-		    cnt = filters.length;
-
-		    return function (item) {
-		        var i = 1,
-		            result = filters[0].call(null, item);
-
-		        for (; i < cnt; i += 1) {
-		            result = result || filters[i].call(null, item);
-		        }
-
-		        return result;
-		    };
-		};
-
-		/**
-		 * Merge several collections.
-		 *
-		 * You can\'t merge collections different _getEventID functions. Take case of use.
-		 * @param {...Collection} collections collection arguments to merge
-		 * @returns {Collection} merged collection.
-		 */
-		Collection.merge = function (collections) {
-		    // eslint-disable-line
-		    var cols = aps.call(arguments),
-		        newItems = {},
-		        merged = new Collection(cols[0].getItemID),
-		        extend = util.extend;
-
-		    forEachArr(cols, function (col) {
-		        extend(newItems, col.items);
-		    });
-
-		    merged.items = newItems;
-		    merged.length = util.keys(merged.items).length;
-
-		    return merged;
-		};
-
-		/**********
-		 * prototype props
-		 **********/
-
-		/**
-		 * get model's unique id.
-		 * @param {object} item model instance.
-		 * @returns {number} model unique id.
-		 */
-		Collection.prototype.getItemID = function (item) {
-		    return item._id + '';
-		};
-
-		/**
-		 * add models.
-		 * @param {...*} item models to add this collection.
-		 */
-		Collection.prototype.add = function (item) {
-		    var id, ownItems;
-
-		    if (arguments.length > 1) {
-		        forEachArr(aps.call(arguments), function (o) {
-		            this.add(o);
-		        }, this);
-
-		        return;
-		    }
-
-		    id = this.getItemID(item);
-		    ownItems = this.items;
-
-		    if (!ownItems[id]) {
-		        this.length += 1;
-		    }
-		    ownItems[id] = item;
-		};
-
-		/**
-		 * remove models.
-		 * @param {...(object|string|number)} id model instance or unique id to delete.
-		 * @returns {array} deleted model list.
-		 */
-		Collection.prototype.remove = function (id) {
-		    var removed = [],
-		        ownItems,
-		        itemToRemove;
-
-		    if (!this.length) {
-		        return removed;
-		    }
-
-		    if (arguments.length > 1) {
-		        removed = util.map(aps.call(arguments), function (id) {
-		            return this.remove(id);
-		        }, this);
-
-		        return removed;
-		    }
-
-		    ownItems = this.items;
-
-		    if (isObj(id)) {
-		        id = this.getItemID(id);
-		    }
-
-		    if (!ownItems[id]) {
-		        return removed;
-		    }
-
-		    this.length -= 1;
-		    itemToRemove = ownItems[id];
-		    delete ownItems[id];
-
-		    return itemToRemove;
-		};
-
-		/**
-		 * remove all models in collection.
-		 */
-		Collection.prototype.clear = function () {
-		    this.items = {};
-		    this.length = 0;
-		};
-
-		/**
-		 * check collection has specific model.
-		 * @param {(object|string|number|function)} id model instance or id or filter function to check
-		 * @returns {boolean} is has model?
-		 */
-		Collection.prototype.has = function (id) {
-		    var isFilter, has;
-
-		    if (!this.length) {
-		        return false;
-		    }
-
-		    isFilter = isFunc(id);
-		    has = false;
-
-		    if (isFilter) {
-		        this.each(function (item) {
-		            if (id(item) === true) {
-		                has = true;
-
-		                return false;
-		            }
-
-		            return true;
-		        });
-		    } else {
-		        id = isObj(id) ? this.getItemID(id) : id;
-		        has = util.isExisty(this.items[id]);
-		    }
-
-		    return has;
-		};
-
-		/**
-		 * invoke callback when model exist in collection.
-		 * @param {(string|number)} id model unique id.
-		 * @param {function} fn the callback.
-		 * @param {*} [context] callback context.
-		 */
-		Collection.prototype.doWhenHas = function (id, fn, context) {
-		    var item = this.items[id];
-
-		    if (!util.isExisty(item)) {
-		        return;
-		    }
-
-		    fn.call(context || this, item);
-		};
-
-		/**
-		 * Search model. and return new collection.
-		 * @param {function} filter filter function.
-		 * @returns {Collection} new collection with filtered models.
-		 * @example
-		 * collection.find(function(item) {
-		 *     return item.edited === true;
-		 * });
-		 *
-		 * function filter1(item) {
-		 *     return item.edited === false;
-		 * }
-		 *
-		 * function filter2(item) {
-		 *     return item.disabled === false;
-		 * }
-		 *
-		 * collection.find(Collection.and(filter1, filter2));
-		 *
-		 * collection.find(Collection.or(filter1, filter2));
-		 */
-		Collection.prototype.find = function (filter) {
-		    var result = new Collection();
-
-		    if (this.hasOwnProperty('getItemID')) {
-		        result.getItemID = this.getItemID;
-		    }
-
-		    this.each(function (item) {
-		        if (filter(item) === true) {
-		            result.add(item);
-		        }
-		    });
-
-		    return result;
-		};
-
-		/**
-		 * Group element by specific key values.
-		 *
-		 * if key parameter is function then invoke it and use returned value.
-		 * @param {(string|number|function|array)} key key property or getter function. if string[] supplied, create each collection before grouping.
-		 * @param {function} [groupFunc] - function that return each group's key
-		 * @returns {object.<string, Collection>} grouped object
-		 * @example
-		 *
-		 * // pass `string`, `number`, `boolean` type value then group by property value.
-		 * collection.groupBy('gender');    // group by 'gender' property value.
-		 * collection.groupBy(50);          // group by '50' property value.
-		 *
-		 * // pass `function` then group by return value. each invocation `function` is called with `(item)`.
-		 * collection.groupBy(function(item) {
-		 *     if (item.score > 60) {
-		 *         return 'pass';
-		 *     }
-		 *     return 'fail';
-		 * });
-		 *
-		 * // pass `array` with first arguments then create each collection before grouping.
-		 * collection.groupBy(['go', 'ruby', 'javascript']);
-		 * // result: { 'go': empty Collection, 'ruby': empty Collection, 'javascript': empty Collection }
-		 *
-		 * // can pass `function` with `array` then group each elements.
-		 * collection.groupBy(['go', 'ruby', 'javascript'], function(item) {
-		 *     if (item.isFast) {
-		 *         return 'go';
-		 *     }
-		 *
-		 *     return item.name;
-		 * });
-		 */
-		Collection.prototype.groupBy = function (key, groupFunc) {
-		    var result = {},
-		        collection,
-		        baseValue,
-		        keyIsFunc = isFunc(key),
-		        getItemIDFn = this.getItemID;
-
-		    if (util.isArray(key)) {
-		        util.forEachArray(key, function (k) {
-		            result[k + ''] = new Collection(getItemIDFn);
-		        });
-
-		        if (!groupFunc) {
-		            return result;
-		        }
-
-		        key = groupFunc;
-		        keyIsFunc = true;
-		    }
-
-		    this.each(function (item) {
-		        if (keyIsFunc) {
-		            baseValue = key(item);
-		        } else {
-		            baseValue = item[key];
-
-		            if (isFunc(baseValue)) {
-		                baseValue = baseValue.apply(item);
-		            }
-		        }
-
-		        collection = result[baseValue];
-
-		        if (!collection) {
-		            collection = result[baseValue] = new Collection(getItemIDFn);
-		        }
-
-		        collection.add(item);
-		    });
-
-		    return result;
-		};
-
-		/**
-		 * Return single item in collection.
-		 *
-		 * Returned item is inserted in this collection firstly.
-		 * @returns {object} item.
-		 */
-		Collection.prototype.single = function () {
-		    var result;
-
-		    this.each(function (item) {
-		        result = item;
-
-		        return false;
-		    }, this);
-
-		    return result;
-		};
-
-		/**
-		 * sort a basis of supplied compare function.
-		 * @param {function} compareFunction compareFunction
-		 * @returns {array} sorted array.
-		 */
-		Collection.prototype.sort = function (compareFunction) {
-		    var arr = [];
-
-		    this.each(function (item) {
-		        arr.push(item);
-		    });
-
-		    if (isFunc(compareFunction)) {
-		        arr = arr.sort(compareFunction);
-		    }
-
-		    return arr;
-		};
-
-		/**
-		 * iterate each model element.
-		 *
-		 * when iteratee return false then break the loop.
-		 * @param {function} iteratee iteratee(item, index, items)
-		 * @param {*} [context] context
-		 */
-		Collection.prototype.each = function (iteratee, context) {
-		    forEachProp(this.items, iteratee, context || this);
-		};
-
-		/**
-		 * return new array with collection items.
-		 * @returns {array} new array.
-		 */
-		Collection.prototype.toArray = function () {
-		    if (!this.length) {
-		        return [];
-		    }
-
-		    return util.map(this.items, function (item) {
-		        return item;
-		    });
-		};
-
-		module.exports = Collection;
-
-	/***/ }),
-	/* 11 */
-	/***/ (function(module, exports, __webpack_require__) {
-
-		/**
-		 * @fileoverview The base class of views.
-		 * @author NHN Ent. FE Development Team <dl_javascript@nhnent.com>
-		 */
-
-		'use strict';
-
-		var util = __webpack_require__(8);
-		var domutil = __webpack_require__(7);
-		var Collection = __webpack_require__(10);
-
-		/**
-		 * Base class of views.
-		 *
-		 * All views create own container element inside supplied container element.
-		 * @constructor
-		 * @param {options} options The object for describe view's specs.
-		 * @param {HTMLElement} container Default container element for view. you can use this element for this.container syntax.
-		 * @ignore
-		 */
-		function View(options, container) {
-		    var id = util.stamp(this);
-
-		    options = options || {};
-
-		    if (util.isUndefined(container)) {
-		        container = domutil.appendHTMLElement('div');
-		    }
-
-		    domutil.addClass(container, 'tui-view-' + id);
-
-		    /**
-		     * unique id
-		     * @type {number}
-		     */
-		    this.id = id;
-
-		    /**
-		     * base element of view.
-		     * @type {HTMLDIVElement}
-		     */
-		    this.container = container;
-
-		    /**
-		     * child views.
-		     * @type {Collection}
-		     */
-		    this.childs = new Collection(function (view) {
-		        return util.stamp(view);
-		    });
-
-		    /**
-		     * parent view instance.
-		     * @type {View}
-		     */
-		    this.parent = null;
-		}
-
-		/**
-		 * Add child views.
-		 * @param {View} view The view instance to add.
-		 * @param {function} [fn] Function for invoke before add. parent view class is supplied first arguments.
-		 */
-		View.prototype.addChild = function (view, fn) {
-		    if (fn) {
-		        fn.call(view, this);
-		    }
-		    // add parent view
-		    view.parent = this;
-
-		    this.childs.add(view);
-		};
-
-		/**
-		 * Remove added child view.
-		 * @param {(number|View)} id View id or instance itself to remove.
-		 * @param {function} [fn] Function for invoke before remove. parent view class is supplied first arguments.
-		 */
-		View.prototype.removeChild = function (id, fn) {
-		    var view = util.isNumber(id) ? this.childs.items[id] : id;
-
-		    id = util.stamp(view);
-
-		    if (fn) {
-		        fn.call(view, this);
-		    }
-
-		    this.childs.remove(id);
-		};
-
-		/**
-		 * Render view recursively.
-		 */
-		View.prototype.render = function () {
-		    this.childs.each(function (childView) {
-		        childView.render();
-		    });
-		};
-
-		/**
-		 * Invoke function recursively.
-		 * @param {function} fn - function to invoke child view recursively
-		 * @param {boolean} [skipThis=false] - set true then skip invoke with this(root) view.
-		 */
-		View.prototype.recursive = function (fn, skipThis) {
-		    if (!util.isFunction(fn)) {
-		        return;
-		    }
-
-		    if (!skipThis) {
-		        fn(this);
-		    }
-
-		    this.childs.each(function (childView) {
-		        childView.recursive(fn);
-		    });
-		};
-
-		/**
-		 * Resize view recursively to parent.
-		 */
-		View.prototype.resize = function () {
-		    var args = Array.prototype.slice.call(arguments),
-		        parent = this.parent;
-
-		    while (parent) {
-		        if (util.isFunction(parent._onResize)) {
-		            parent._onResize.apply(parent, args);
-		        }
-
-		        parent = parent.parent;
-		    }
-		};
-
-		/**
-		 * Invoking method before destroying.
-		 */
-		View.prototype._beforeDestroy = function () {};
-
-		/**
-		 * Clear properties
-		 */
-		View.prototype._destroy = function () {
-		    this._beforeDestroy();
-		    this.childs.clear();
-		    this.container.innerHTML = '';
-
-		    this.id = this.parent = this.childs = this.container = null;
-		};
-
-		/**
-		 * Destroy child view recursively.
-		 * @param {boolean} isChildView - Whether it is the child view or not
-		 */
-		View.prototype.destroy = function (isChildView) {
-		    this.childs.each(function (childView) {
-		        childView.destroy(true);
-		        childView._destroy();
-		    });
-
-		    if (isChildView) {
-		        return;
-		    }
-
-		    this._destroy();
-		};
-
-		/**
-		 * Calculate view's container element bound.
-		 * @returns {object} The bound of container element.
-		 */
-		View.prototype.getViewBound = function () {
-		    var container = this.container,
-		        position = domutil.getPosition(container),
-		        size = domutil.getSize(container);
-
-		    return {
-		        x: position[0],
-		        y: position[1],
-		        width: size[0],
-		        height: size[1]
-		    };
-		};
-
-		module.exports = View;
-
-	/***/ }),
-	/* 12 */
-	/***/ (function(module, exports, __webpack_require__) {
-
-		/* WEBPACK VAR INJECTION */(function(global) {/**
-		 * @fileoverview General drag handler
-		 * @author NHN Ent. FE Development Team <dl_javascript@nhnent.com>
-		 */
-
-		'use strict';
-
-		var util = __webpack_require__(8);
-		var domutil = __webpack_require__(7);
-		var domevent = __webpack_require__(9);
-
-		/**
-		 * @constructor
-		 * @mixes CustomEvents
-		 * @param {object} options - options for drag handler
-		 * @param {number} [options.distance=10] - distance in pixels after mouse must move before dragging should start
-		 * @param {HTMLElement} container - container element to bind drag events
-		 * @ignore
-		 */
-		function Drag(options, container) {
-		    domevent.on(container, 'mousedown', this._onMouseDown, this);
-
-		    this.options = util.extend({
-		        distance: 10
-		    }, options);
-
-		    /**
-		     * @type {HTMLElement}
-		     */
-		    this.container = container;
-
-		    /**
-		     * @type {boolean}
-		     */
-		    this._isMoved = false;
-
-		    /**
-		     * dragging distance in pixel between mousedown and firing dragStart events
-		     * @type {number}
-		     */
-		    this._distance = 0;
-
-		    /**
-		     * @type {boolean}
-		     */
-		    this._dragStartFired = false;
-
-		    /**
-		     * @type {object}
-		     */
-		    this._dragStartEventData = null;
-		}
-
-		/**
-		 * Destroy method.
-		 */
-		Drag.prototype.destroy = function () {
-		    domevent.off(this.container, 'mousedown', this._onMouseDown, this);
-
-		    this.options = this.container = this._isMoved = this._distance = this._dragStartFired = this._dragStartEventData = null;
-		};
-
-		/**
-		 * Toggle events for mouse dragging.
-		 * @param {boolean} toBind - bind events related with dragging when supplied "true"
-		 */
-		Drag.prototype._toggleDragEvent = function (toBind) {
-		    var container = this.container,
-		        domMethod,
-		        method;
-
-		    if (toBind) {
-		        domMethod = 'on';
-		        method = 'disable';
-		    } else {
-		        domMethod = 'off';
-		        method = 'enable';
-		    }
-
-		    domutil[method + 'TextSelection'](container);
-		    domutil[method + 'ImageDrag'](container);
-		    domevent[domMethod](global.document, {
-		        mousemove: this._onMouseMove,
-		        mouseup: this._onMouseUp
-		    }, this);
-		};
-
-		/**
-		 * Normalize mouse event object.
-		 * @param {MouseEvent} mouseEvent - mouse event object.
-		 * @returns {object} normalized mouse event data.
-		 */
-		Drag.prototype._getEventData = function (mouseEvent) {
-		    return {
-		        target: mouseEvent.target || mouseEvent.srcElement,
-		        originEvent: mouseEvent
-		    };
-		};
-
-		/**
-		 * MouseDown DOM event handler.
-		 * @param {MouseEvent} mouseDownEvent MouseDown event object.
-		 */
-		Drag.prototype._onMouseDown = function (mouseDownEvent) {
-		    // only primary button can start drag.
-		    if (domevent.getMouseButton(mouseDownEvent) !== 0) {
-		        return;
-		    }
-
-		    this._distance = 0;
-		    this._dragStartFired = false;
-		    this._dragStartEventData = this._getEventData(mouseDownEvent);
-
-		    this._toggleDragEvent(true);
-		};
-
-		/**
-		 * MouseMove DOM event handler.
-		 * @emits Drag#drag
-		 * @emits Drag#dragStart
-		 * @param {MouseEvent} mouseMoveEvent MouseMove event object.
-		 */
-		Drag.prototype._onMouseMove = function (mouseMoveEvent) {
-		    var distance = this.options.distance;
-		    // prevent automatic scrolling.
-		    domevent.preventDefault(mouseMoveEvent);
-
-		    this._isMoved = true;
-
-		    if (this._distance < distance) {
-		        this._distance += 1;
-
-		        return;
-		    }
-
-		    if (!this._dragStartFired) {
-		        this._dragStartFired = true;
-
-		        /**
-		         * Drag starts events. cancelable.
-		         * @event Drag#dragStart
-		         * @type {object}
-		         * @property {HTMLElement} target - target element in this event.
-		         * @property {MouseEvent} originEvent - original mouse event object.
-		         */
-		        if (!this.invoke('dragStart', this._dragStartEventData)) {
-		            this._toggleDragEvent(false);
-
-		            return;
-		        }
-		    }
-
-		    /**
-		     * Events while dragging.
-		     * @event Drag#drag
-		     * @type {object}
-		     * @property {HTMLElement} target - target element in this event.
-		     * @property {MouseEvent} originEvent - original mouse event object.
-		     */
-		    this.fire('drag', this._getEventData(mouseMoveEvent));
-		};
-
-		/**
-		 * MouseUp DOM event handler.
-		 * @param {MouseEvent} mouseUpEvent MouseUp event object.
-		 * @emits Drag#dragEnd
-		 * @emits Drag#click
-		 */
-		Drag.prototype._onMouseUp = function (mouseUpEvent) {
-		    this._toggleDragEvent(false);
-
-		    // emit "click" event when not emitted drag event between mousedown and mouseup.
-		    if (this._isMoved) {
-		        this._isMoved = false;
-
-		        /**
-		         * Drag end events.
-		         * @event Drag#dragEnd
-		         * @type {MouseEvent}
-		         * @property {HTMLElement} target - target element in this event.
-		         * @property {MouseEvent} originEvent - original mouse event object.
-		         */
-		        this.fire('dragEnd', this._getEventData(mouseUpEvent));
-
-		        return;
-		    }
-
-		    /**
-		     * Click events.
-		     * @event Drag#click
-		     * @type {MouseEvent}
-		     * @property {HTMLElement} target - target element in this event.
-		     * @property {MouseEvent} originEvent - original mouse event object.
-		     */
-		    this.fire('click', this._getEventData(mouseUpEvent));
-		};
-
-		util.CustomEvents.mixin(Drag);
-
-		module.exports = Drag;
-		/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
-
-	/***/ }),
-	/* 13 */
-	/***/ (function(module, exports, __webpack_require__) {
-
-		/**
-		 * @fileoverview ColorPicker factory module
-		 * @author NHN Ent. FE Development Team <dl_javascript@nhnent.com>
-		 */
-
-		'use strict';
-
-		var util = __webpack_require__(8);
-		var colorutil = __webpack_require__(14);
-		var Layout = __webpack_require__(15);
-		var Palette = __webpack_require__(16);
-		var Slider = __webpack_require__(18);
-
-		var hostnameSent = false;
-
-		/**
-		 * send hostname
-		 * @ignore
-		 */
-		function sendHostname() {
-		    var hostname = location.hostname;
-
-		    if (hostnameSent) {
-		        return;
-		    }
-		    hostnameSent = true;
-
-		    util.imagePing('https://www.google-analytics.com/collect', {
-		        v: 1,
-		        t: 'event',
-		        tid: 'UA-115377265-9',
-		        cid: hostname,
-		        dp: hostname,
-		        dh: 'color-picker'
-		    });
-		}
-
-		/**
-		 * @constructor
-		 * @mixes CustomEvents
-		 * @param {object} options - options for colorpicker component
-		 *  @param {HTMLDivElement} options.container - container element
-		 *  @param {string} [options.color='#ffffff'] - default selected color
-		 *  @param {string[]} [options.preset] - color preset for palette (use base16 palette if not supplied)
-		 *  @param {string} [options.cssPrefix='tui-colorpicker-'] - css prefix text for each child elements
-		 *  @param {string} [options.detailTxt='Detail'] - text for detail button.
-		 *  @param {boolean} [options.usageStatistics=true] - Let us know the hostname. If you don't want to send the hostname, please set to false.
-		 * @example
-		 * var colorPicker = tui.colorPicker; // or require('tui-color-picker')
-		 *
-		 * colorPicker.create({
-		 *   container: document.getElementById('color-picker')
-		 * });
-		 */
-		function ColorPicker(options) {
-		    var layout;
-
-		    if (!(this instanceof ColorPicker)) {
-		        return new ColorPicker(options);
-		    }
-		    /**
-		     * Option object
-		     * @type {object}
-		     * @private
-		     */
-		    options = this.options = util.extend({
-		        container: null,
-		        color: '#f8f8f8',
-		        preset: ['#181818', '#282828', '#383838', '#585858', '#b8b8b8', '#d8d8d8', '#e8e8e8', '#f8f8f8', '#ab4642', '#dc9656', '#f7ca88', '#a1b56c', '#86c1b9', '#7cafc2', '#ba8baf', '#a16946'],
-		        cssPrefix: 'tui-colorpicker-',
-		        detailTxt: 'Detail',
-		        usageStatistics: true
-		    }, options);
-
-		    if (!options.container) {
-		        throw new Error('ColorPicker(): need container option.');
-		    }
-
-		    /**********
-		     * Create layout view
-		     **********/
-
-		    /**
-		     * @type {Layout}
-		     * @private
-		     */
-		    layout = this.layout = new Layout(options, options.container);
-
-		    /**********
-		     * Create palette view
-		     **********/
-		    this.palette = new Palette(options, layout.container);
-		    this.palette.on({
-		        '_selectColor': this._onSelectColorInPalette,
-		        '_toggleSlider': this._onToggleSlider
-		    }, this);
-
-		    /**********
-		     * Create slider view
-		     **********/
-		    this.slider = new Slider(options, layout.container);
-		    this.slider.on('_selectColor', this._onSelectColorInSlider, this);
-
-		    /**********
-		     * Add child views
-		     **********/
-		    layout.addChild(this.palette);
-		    layout.addChild(this.slider);
-
-		    this.render(options.color);
-
-		    if (options.usageStatistics) {
-		        sendHostname();
-		    }
-		}
-
-		/**
-		 * Handler method for Palette#_selectColor event
-		 * @private
-		 * @fires ColorPicker#selectColor
-		 * @param {object} selectColorEventData - event data
-		 */
-		ColorPicker.prototype._onSelectColorInPalette = function (selectColorEventData) {
-		    var color = selectColorEventData.color,
-		        opt = this.options;
-
-		    if (!colorutil.isValidRGB(color) && color !== '') {
-		        this.render();
-
-		        return;
-		    }
-
-		    /**
-		     * @event ColorPicker#selectColor
-		     * @type {object}
-		     * @property {string} color - selected color (hex string)
-		     * @property {string} origin - flags for represent the source of event fires.
-		     */
-		    this.fire('selectColor', {
-		        color: color,
-		        origin: 'palette'
-		    });
-
-		    if (opt.color === color) {
-		        return;
-		    }
-
-		    opt.color = color;
-		    this.render(color);
-		};
-
-		/**
-		 * Handler method for Palette#_toggleSlider event
-		 * @private
-		 */
-		ColorPicker.prototype._onToggleSlider = function () {
-		    this.slider.toggle(!this.slider.isVisible());
-		};
-
-		/**
-		 * Handler method for Slider#_selectColor event
-		 * @private
-		 * @fires ColorPicker#selectColor
-		 * @param {object} selectColorEventData - event data
-		 */
-		ColorPicker.prototype._onSelectColorInSlider = function (selectColorEventData) {
-		    var color = selectColorEventData.color,
-		        opt = this.options;
-
-		    /**
-		     * @event ColorPicker#selectColor
-		     * @type {object}
-		     * @property {string} color - selected color (hex string)
-		     * @property {string} origin - flags for represent the source of event fires.
-		     * @ignore
-		     */
-		    this.fire('selectColor', {
-		        color: color,
-		        origin: 'slider'
-		    });
-
-		    if (opt.color === color) {
-		        return;
-		    }
-
-		    opt.color = color;
-		    this.palette.render(color);
-		};
-
-		/**********
-		 * PUBLIC API
-		 **********/
-
-		/**
-		 * Set color to colorpicker instance.<br>
-		 * The string parameter must be hex color value
-		 * @param {string} hexStr - hex formatted color string
-		 * @example
-		 * colorPicker.setColor('#ffff00');
-		 */
-		ColorPicker.prototype.setColor = function (hexStr) {
-		    if (!colorutil.isValidRGB(hexStr)) {
-		        throw new Error('ColorPicker#setColor(): need valid hex string color value');
-		    }
-
-		    this.options.color = hexStr;
-		    this.render(hexStr);
-		};
-
-		/**
-		 * Get hex color string of current selected color in colorpicker instance.
-		 * @returns {string} hex string formatted color
-		 * @example
-		 * colorPicker.setColor('#ffff00');
-		 * colorPicker.getColor(); // '#ffff00';
-		 */
-		ColorPicker.prototype.getColor = function () {
-		    return this.options.color;
-		};
-
-		/**
-		 * Toggle colorpicker element. set true then reveal colorpicker view.
-		 * @param {boolean} [isShow=false] - A flag to show
-		 * @example
-		 * colorPicker.toggle(false); // hide
-		 * colorPicker.toggle(); // hide
-		 * colorPicker.toggle(true); // show
-		 */
-		ColorPicker.prototype.toggle = function (isShow) {
-		    this.layout.container.style.display = !!isShow ? 'block' : 'none';
-		};
-
-		/**
-		 * Render colorpicker
-		 * @param {string} [color] - selected color
-		 * @ignore
-		 */
-		ColorPicker.prototype.render = function (color) {
-		    this.layout.render(color || this.options.color);
-		};
-
-		/**
-		 * Destroy colorpicker instance.
-		 * @example
-		 * colorPicker.destroy(); // DOM-element is removed
-		 */
-		ColorPicker.prototype.destroy = function () {
-		    this.layout.destroy();
-		    this.options.container.innerHTML = '';
-
-		    this.layout = this.slider = this.palette = this.options = null;
-		};
-
-		util.CustomEvents.mixin(ColorPicker);
-
-		module.exports = ColorPicker;
-
-	/***/ }),
-	/* 14 */
-	/***/ (function(module, exports) {
-
-		/**
-		 * @fileoverview Utility methods to manipulate colors
-		 * @author NHN Ent. FE Development Team <dl_javascript@nhnent.com>
-		 */
-
-		'use strict';
-
-		var hexRX = /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i;
-
-		var colorutil = {
-		    /**
-		     * pad left zero characters.
-		     * @param {number} number number value to pad zero.
-		     * @param {number} length pad length to want.
-		     * @returns {string} padded string.
-		     */
-		    leadingZero: function (number, length) {
-		        var zero = '',
-		            i = 0;
-
-		        if ((number + '').length > length) {
-		            return number + '';
-		        }
-
-		        for (; i < length - 1; i += 1) {
-		            zero += '0';
-		        }
-
-		        return (zero + number).slice(length * -1);
-		    },
-
-		    /**
-		     * Check validate of hex string value is RGB
-		     * @param {string} str - rgb hex string
-		     * @returns {boolean} return true when supplied str is valid RGB hex string
-		     */
-		    isValidRGB: function (str) {
-		        return hexRX.test(str);
-		    },
-
-		    // @license RGB <-> HSV conversion utilities based off of http://www.cs.rit.edu/~ncs/color/t_convert.html
-
-		    /**
-		     * Convert color hex string to rgb number array
-		     * @param {string} hexStr - hex string
-		     * @returns {number[]} rgb numbers
-		     */
-		    hexToRGB: function (hexStr) {
-		        var r, g, b;
-
-		        if (!colorutil.isValidRGB(hexStr)) {
-		            return false;
-		        }
-
-		        hexStr = hexStr.substring(1);
-
-		        r = parseInt(hexStr.substr(0, 2), 16);
-		        g = parseInt(hexStr.substr(2, 2), 16);
-		        b = parseInt(hexStr.substr(4, 2), 16);
-
-		        return [r, g, b];
-		    },
-
-		    /**
-		     * Convert rgb number to hex string
-		     * @param {number} r - red
-		     * @param {number} g - green
-		     * @param {number} b - blue
-		     * @returns {string|boolean} return false when supplied rgb number is not valid. otherwise, converted hex string
-		     */
-		    rgbToHEX: function (r, g, b) {
-		        var hexStr = '#' + colorutil.leadingZero(r.toString(16), 2) + colorutil.leadingZero(g.toString(16), 2) + colorutil.leadingZero(b.toString(16), 2);
-
-		        if (colorutil.isValidRGB(hexStr)) {
-		            return hexStr;
-		        }
-
-		        return false;
-		    },
-
-		    /**
-		     * Convert rgb number to HSV value
-		     * @param {number} r - red
-		     * @param {number} g - green
-		     * @param {number} b - blue
-		     * @returns {number[]} hsv value
-		     */
-		    rgbToHSV: function (r, g, b) {
-		        var max, min, h, s, v, d;
-
-		        r /= 255;
-		        g /= 255;
-		        b /= 255;
-		        max = Math.max(r, g, b);
-		        min = Math.min(r, g, b);
-		        v = max;
-		        d = max - min;
-		        s = max === 0 ? 0 : d / max;
-
-		        if (max === min) {
-		            h = 0;
-		        } else {
-		            switch (max) {
-		                case r:
-		                    h = (g - b) / d + (g < b ? 6 : 0);break;
-		                case g:
-		                    h = (b - r) / d + 2;break;
-		                case b:
-		                    h = (r - g) / d + 4;break;
-		                // no default
-		            }
-		            h /= 6;
-		        }
-
-		        return [Math.round(h * 360), Math.round(s * 100), Math.round(v * 100)];
-		    },
-
-		    /**
-		     * Convert HSV number to RGB
-		     * @param {number} h - hue
-		     * @param {number} s - saturation
-		     * @param {number} v - value
-		     * @returns {number[]} rgb value
-		     */
-		    hsvToRGB: function (h, s, v) {
-		        var r, g, b;
-		        var i;
-		        var f, p, q, t;
-
-		        h = Math.max(0, Math.min(360, h));
-		        s = Math.max(0, Math.min(100, s));
-		        v = Math.max(0, Math.min(100, v));
-
-		        s /= 100;
-		        v /= 100;
-
-		        if (s === 0) {
-		            // Achromatic (grey)
-		            r = g = b = v;
-
-		            return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
-		        }
-
-		        h /= 60; // sector 0 to 5
-		        i = Math.floor(h);
-		        f = h - i; // factorial part of h
-		        p = v * (1 - s);
-		        q = v * (1 - s * f);
-		        t = v * (1 - s * (1 - f));
-
-		        switch (i) {
-		            case 0:
-		                r = v;g = t;b = p;break;
-		            case 1:
-		                r = q;g = v;b = p;break;
-		            case 2:
-		                r = p;g = v;b = t;break;
-		            case 3:
-		                r = p;g = q;b = v;break;
-		            case 4:
-		                r = t;g = p;b = v;break;
-		            default:
-		                r = v;g = p;b = q;break;
-		        }
-
-		        return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
-		    }
-		};
-
-		module.exports = colorutil;
-
-	/***/ }),
-	/* 15 */
-	/***/ (function(module, exports, __webpack_require__) {
-
-		/**
-		 * @fileoverview ColorPicker layout module
-		 * @author NHN Ent. FE Development Team <dl_javascript@nhnent.com>
-		 */
-
-		'use strict';
-
-		var util = __webpack_require__(8);
-		var domutil = __webpack_require__(7);
-		var View = __webpack_require__(11);
-
-		/**
-		 * @constructor
-		 * @extends {View}
-		 * @param {object} options - option object
-		 *  @param {string} options.cssPrefix - css prefix for each child elements
-		 * @param {HTMLDivElement} container - container
-		 * @ignore
-		 */
-		function Layout(options, container) {
-		    /**
-		     * option object
-		     * @type {object}
-		     */
-		    this.options = util.extend({
-		        cssPrefix: 'tui-colorpicker-'
-		    }, options);
-
-		    container = domutil.appendHTMLElement('div', container, this.options.cssPrefix + 'container');
-
-		    View.call(this, options, container);
-
-		    this.render();
-		}
-
-		util.inherit(Layout, View);
-
-		/**
-		 * @override
-		 * @param {string} [color] - selected color
-		 */
-		Layout.prototype.render = function (color) {
-		    this.recursive(function (view) {
-		        view.render(color);
-		    }, true);
-		};
-
-		module.exports = Layout;
-
-	/***/ }),
-	/* 16 */
-	/***/ (function(module, exports, __webpack_require__) {
-
-		/**
-		 * @fileoverview Color palette view
-		 * @author NHN Ent. FE Development Team <dl_javascript@nhnent.com>
-		 */
-
-		'use strict';
-
-		var util = __webpack_require__(8);
-		var domutil = __webpack_require__(7);
-		var colorutil = __webpack_require__(14);
-		var domevent = __webpack_require__(9);
-		var View = __webpack_require__(11);
-		var tmpl = __webpack_require__(17);
-
-		/**
-		 * @constructor
-		 * @extends {View}
-		 * @mixes CustomEvents
-		 * @param {object} options - options for color palette view
-		 *  @param {string[]} options.preset - color list
-		 * @param {HTMLDivElement} container - container element
-		 * @ignore
-		 */
-		function Palette(options, container) {
-		    /**
-		     * option object
-		     * @type {object}
-		     */
-		    this.options = util.extend({
-		        cssPrefix: 'tui-colorpicker-',
-		        preset: ['#181818', '#282828', '#383838', '#585858', '#B8B8B8', '#D8D8D8', '#E8E8E8', '#F8F8F8', '#AB4642', '#DC9656', '#F7CA88', '#A1B56C', '#86C1B9', '#7CAFC2', '#BA8BAF', '#A16946'],
-		        detailTxt: 'Detail'
-		    }, options);
-
-		    container = domutil.appendHTMLElement('div', container, this.options.cssPrefix + 'palette-container');
-
-		    View.call(this, options, container);
-		}
-
-		util.inherit(Palette, View);
-
-		/**
-		 * Mouse click event handler
-		 * @fires Palette#_selectColor
-		 * @fires Palette#_toggleSlider
-		 * @param {MouseEvent} clickEvent - mouse event object
-		 */
-		Palette.prototype._onClick = function (clickEvent) {
-		    var options = this.options,
-		        target = clickEvent.srcElement || clickEvent.target,
-		        eventData = {};
-
-		    if (domutil.hasClass(target, options.cssPrefix + 'palette-button')) {
-		        eventData.color = target.value;
-
-		        /**
-		         * @event Palette#_selectColor
-		         * @type {object}
-		         * @property {string} color - selected color value
-		         */
-		        this.fire('_selectColor', eventData);
-
-		        return;
-		    }
-
-		    if (domutil.hasClass(target, options.cssPrefix + 'palette-toggle-slider')) {
-		        /**
-		         * @event Palette#_toggleSlider
-		         */
-		        this.fire('_toggleSlider');
-		    }
-		};
-
-		/**
-		 * Textbox change event handler
-		 * @fires Palette#_selectColor
-		 * @param {Event} changeEvent - change event object
-		 */
-		Palette.prototype._onChange = function (changeEvent) {
-		    var options = this.options,
-		        target = changeEvent.srcElement || changeEvent.target,
-		        eventData = {};
-
-		    if (domutil.hasClass(target, options.cssPrefix + 'palette-hex')) {
-		        eventData.color = target.value;
-
-		        /**
-		         * @event Palette#_selectColor
-		         * @type {object}
-		         * @property {string} color - selected color value
-		         */
-		        this.fire('_selectColor', eventData);
-		    }
-		};
-
-		/**
-		 * Invoke before destory
-		 * @override
-		 */
-		Palette.prototype._beforeDestroy = function () {
-		    this._toggleEvent(false);
-		};
-
-		/**
-		 * Toggle view DOM events
-		 * @param {boolean} [onOff=false] - true to bind event.
-		 */
-		Palette.prototype._toggleEvent = function (onOff) {
-		    var options = this.options,
-		        container = this.container,
-		        method = domevent[!!onOff ? 'on' : 'off'],
-		        hexTextBox;
-
-		    method(container, 'click', this._onClick, this);
-
-		    hexTextBox = domutil.find('.' + options.cssPrefix + 'palette-hex', container);
-
-		    if (hexTextBox) {
-		        method(hexTextBox, 'change', this._onChange, this);
-		    }
-		};
-
-		/**
-		 * Render palette
-		 * @override
-		 */
-		Palette.prototype.render = function (color) {
-		    var options = this.options,
-		        html = '';
-
-		    this._toggleEvent(false);
-
-		    html = tmpl.layout.replace('{{colorList}}', util.map(options.preset, function (itemColor) {
-		        var itemHtml = '';
-		        var style = '';
-
-		        if (colorutil.isValidRGB(itemColor)) {
-		            style = domutil.applyTemplate(tmpl.itemStyle, { color: itemColor });
-		        }
-
-		        itemHtml = domutil.applyTemplate(tmpl.item, {
-		            itemStyle: style,
-		            itemClass: !itemColor ? ' ' + options.cssPrefix + 'color-transparent' : '',
-		            color: itemColor,
-		            cssPrefix: options.cssPrefix,
-		            selected: itemColor === color ? ' ' + options.cssPrefix + 'selected' : ''
-		        });
-
-		        return itemHtml;
-		    }).join(''));
-
-		    html = domutil.applyTemplate(html, {
-		        cssPrefix: options.cssPrefix,
-		        detailTxt: options.detailTxt,
-		        color: color
-		    });
-
-		    this.container.innerHTML = html;
-
-		    this._toggleEvent(true);
-		};
-
-		util.CustomEvents.mixin(Palette);
-
-		module.exports = Palette;
-
-	/***/ }),
-	/* 17 */
-	/***/ (function(module, exports) {
-
-		/**
-		 * @fileoverview Palette view template
-		 * @author NHN Ent. FE Development Team <dl_javascript@nhnent.com>
-		 */
-
-		'use strict';
-
-		var layout = ['<ul class="{{cssPrefix}}clearfix">{{colorList}}</ul>', '<div class="{{cssPrefix}}clearfix" style="overflow:hidden">', '<input type="button" class="{{cssPrefix}}palette-toggle-slider" value="{{detailTxt}}" />', '<input type="text" class="{{cssPrefix}}palette-hex" value="{{color}}" maxlength="7" />', '<span class="{{cssPrefix}}palette-preview" style="background-color:{{color}};color:{{color}}">{{color}}</span>', '</div>'].join('\n');
-
-		var item = '<li><input class="{{cssPrefix}}palette-button{{selected}}{{itemClass}}" type="button" style="{{itemStyle}}" title="{{color}}" value="{{color}}" /></li>';
-		var itemStyle = 'background-color:{{color}};color:{{color}}';
-
-		module.exports = {
-		    layout: layout,
-		    item: item,
-		    itemStyle: itemStyle
-		};
-
-	/***/ }),
-	/* 18 */
-	/***/ (function(module, exports, __webpack_require__) {
-
-		/**
-		 * @fileoverview Slider view
-		 * @author NHN Ent. FE Development Team <dl_javascript@nhnent.com>
-		 */
-
-		'use strict';
-
-		var util = __webpack_require__(8);
-		var domutil = __webpack_require__(7);
-		var domevent = __webpack_require__(9);
-		var svgvml = __webpack_require__(19);
-		var colorutil = __webpack_require__(14);
-		var View = __webpack_require__(11);
-		var Drag = __webpack_require__(12);
-		var tmpl = __webpack_require__(20);
-
-		// Limitation position of point element inside of colorslider and hue bar
-		// Minimum value can to be negative because that using color point of handle element is center point. not left, top point.
-		var COLORSLIDER_POS_LIMIT_RANGE = [-7, 112];
-		var HUEBAR_POS_LIMIT_RANGE = [-3, 115];
-		var HUE_WHEEL_MAX = 359.99;
-
-		/**
-		 * @constructor
-		 * @extends {View}
-		 * @mixes CustomEvents
-		 * @param {object} options - options for view
-		 *  @param {string} options.cssPrefix - design css prefix
-		 * @param {HTMLElement} container - container element
-		 * @ignore
-		 */
-		function Slider(options, container) {
-		    container = domutil.appendHTMLElement('div', container, options.cssPrefix + 'slider-container');
-		    container.style.display = 'none';
-
-		    View.call(this, options, container);
-
-		    /**
-		     * @type {object}
-		     */
-		    this.options = util.extend({
-		        color: '#f8f8f8',
-		        cssPrefix: 'tui-colorpicker-'
-		    }, options);
-
-		    /**
-		     * Cache immutable data in click, drag events.
-		     *
-		     * (i.e. is event related with colorslider? or huebar?)
-		     * @type {object}
-		     * @property {boolean} isColorSlider
-		     * @property {number[]} containerSize
-		     */
-		    this._dragDataCache = {};
-
-		    /**
-		     * Color slider handle element
-		     * @type {SVG|VML}
-		     */
-		    this.sliderHandleElement = null;
-
-		    /**
-		     * hue bar handle element
-		     * @type {SVG|VML}
-		     */
-		    this.huebarHandleElement = null;
-
-		    /**
-		     * Element that render base color in colorslider part
-		     * @type {SVG|VML}
-		     */
-		    this.baseColorElement = null;
-
-		    /**
-		     * @type {Drag}
-		     */
-		    this.drag = new Drag({
-		        distance: 0
-		    }, container);
-
-		    // bind drag events
-		    this.drag.on({
-		        'dragStart': this._onDragStart,
-		        'drag': this._onDrag,
-		        'dragEnd': this._onDragEnd,
-		        'click': this._onClick
-		    }, this);
-		}
-
-		util.inherit(Slider, View);
-
-		/**
-		 * @override
-		 */
-		Slider.prototype._beforeDestroy = function () {
-		    this.drag.off();
-
-		    this.drag = this.options = this._dragDataCache = this.sliderHandleElement = this.huebarHandleElement = this.baseColorElement = null;
-		};
-
-		/**
-		 * Toggle slider view
-		 * @param {boolean} onOff - set true then reveal slider view
-		 */
-		Slider.prototype.toggle = function (onOff) {
-		    this.container.style.display = !!onOff ? 'block' : 'none';
-		};
-
-		/**
-		 * Get slider display status
-		 * @returns {boolean} return true when slider is visible
-		 */
-		Slider.prototype.isVisible = function () {
-		    return this.container.style.display === 'block';
-		};
-
-		/**
-		 * Render slider view
-		 * @override
-		 * @param {string} colorStr - hex string color from parent view (Layout)
-		 */
-		Slider.prototype.render = function (colorStr) {
-		    var that = this,
-		        container = that.container,
-		        options = that.options,
-		        html = tmpl.layout,
-		        rgb,
-		        hsv;
-
-		    if (!colorutil.isValidRGB(colorStr)) {
-		        return;
-		    }
-
-		    html = html.replace(/{{slider}}/, tmpl.slider);
-		    html = html.replace(/{{huebar}}/, tmpl.huebar);
-		    html = html.replace(/{{cssPrefix}}/g, options.cssPrefix);
-
-		    that.container.innerHTML = html;
-
-		    that.sliderHandleElement = domutil.find('.' + options.cssPrefix + 'slider-handle', container);
-		    that.huebarHandleElement = domutil.find('.' + options.cssPrefix + 'huebar-handle', container);
-		    that.baseColorElement = domutil.find('.' + options.cssPrefix + 'slider-basecolor', container);
-
-		    rgb = colorutil.hexToRGB(colorStr);
-		    hsv = colorutil.rgbToHSV.apply(null, rgb);
-
-		    this.moveHue(hsv[0], true);
-		    this.moveSaturationAndValue(hsv[1], hsv[2], true);
-		};
-
-		/**
-		 * Move colorslider by newLeft(X), newTop(Y) value
-		 * @private
-		 * @param {number} newLeft - left pixel value to move handle
-		 * @param {number} newTop - top pixel value to move handle
-		 * @param {boolean} [silent=false] - set true then not fire custom event
-		 */
-		Slider.prototype._moveColorSliderHandle = function (newLeft, newTop, silent) {
-		    var handle = this.sliderHandleElement,
-		        handleColor;
-
-		    // Check position limitation.
-		    newTop = Math.max(COLORSLIDER_POS_LIMIT_RANGE[0], newTop);
-		    newTop = Math.min(COLORSLIDER_POS_LIMIT_RANGE[1], newTop);
-		    newLeft = Math.max(COLORSLIDER_POS_LIMIT_RANGE[0], newLeft);
-		    newLeft = Math.min(COLORSLIDER_POS_LIMIT_RANGE[1], newLeft);
-
-		    svgvml.setTranslateXY(handle, newLeft, newTop);
-
-		    handleColor = newTop > 50 ? 'white' : 'black';
-		    svgvml.setStrokeColor(handle, handleColor);
-
-		    if (!silent) {
-		        this.fire('_selectColor', {
-		            color: colorutil.rgbToHEX.apply(null, this.getRGB())
-		        });
-		    }
-		};
-
-		/**
-		 * Move colorslider by supplied saturation and values.
-		 *
-		 * The movement of color slider handle follow HSV cylinder model. {@link https://en.wikipedia.org/wiki/HSL_and_HSV}
-		 * @param {number} saturation - the percent of saturation (0% ~ 100%)
-		 * @param {number} value - the percent of saturation (0% ~ 100%)
-		 * @param {boolean} [silent=false] - set true then not fire custom event
-		 */
-		Slider.prototype.moveSaturationAndValue = function (saturation, value, silent) {
-		    var absMin, maxValue, newLeft, newTop;
-
-		    saturation = saturation || 0;
-		    value = value || 0;
-
-		    absMin = Math.abs(COLORSLIDER_POS_LIMIT_RANGE[0]);
-		    maxValue = COLORSLIDER_POS_LIMIT_RANGE[1];
-
-		    // subtract absMin value because current color position is not left, top of handle element.
-		    // The saturation. from left 0 to right 100
-		    newLeft = saturation * maxValue / 100 - absMin;
-		    // The Value. from top 100 to bottom 0. that why newTop subtract by maxValue.
-		    newTop = maxValue - value * maxValue / 100 - absMin;
-
-		    this._moveColorSliderHandle(newLeft, newTop, silent);
-		};
-
-		/**
-		 * Move color slider handle to supplied position
-		 *
-		 * The number of X, Y must be related value from color slider container
-		 * @private
-		 * @param {number} x - the pixel value to move handle
-		 * @param {number} y - the pixel value to move handle
-		 */
-		Slider.prototype._moveColorSliderByPosition = function (x, y) {
-		    var offset = COLORSLIDER_POS_LIMIT_RANGE[0];
-		    this._moveColorSliderHandle(x + offset, y + offset);
-		};
-
-		/**
-		 * Get saturation and value value.
-		 * @returns {number[]} saturation and value
-		 */
-		Slider.prototype.getSaturationAndValue = function () {
-		    var absMin = Math.abs(COLORSLIDER_POS_LIMIT_RANGE[0]),
-		        maxValue = absMin + COLORSLIDER_POS_LIMIT_RANGE[1],
-		        position = svgvml.getTranslateXY(this.sliderHandleElement),
-		        saturation,
-		        value;
-
-		    saturation = (position[1] + absMin) / maxValue * 100;
-		    // The value of HSV color model is inverted. top 100 ~ bottom 0. so subtract by 100
-		    value = 100 - (position[0] + absMin) / maxValue * 100;
-
-		    return [saturation, value];
-		};
-
-		/**
-		 * Move hue handle supplied pixel value
-		 * @private
-		 * @param {number} newTop - pixel to move hue handle
-		 * @param {boolean} [silent=false] - set true then not fire custom event
-		 */
-		Slider.prototype._moveHueHandle = function (newTop, silent) {
-		    var hueHandleElement = this.huebarHandleElement,
-		        baseColorElement = this.baseColorElement,
-		        newGradientColor,
-		        hexStr;
-
-		    newTop = Math.max(HUEBAR_POS_LIMIT_RANGE[0], newTop);
-		    newTop = Math.min(HUEBAR_POS_LIMIT_RANGE[1], newTop);
-
-		    svgvml.setTranslateY(hueHandleElement, newTop);
-
-		    newGradientColor = colorutil.hsvToRGB(this.getHue(), 100, 100);
-		    hexStr = colorutil.rgbToHEX.apply(null, newGradientColor);
-
-		    svgvml.setGradientColorStop(baseColorElement, hexStr);
-
-		    if (!silent) {
-		        this.fire('_selectColor', {
-		            color: colorutil.rgbToHEX.apply(null, this.getRGB())
-		        });
-		    }
-		};
-
-		/**
-		 * Move hue bar handle by supplied degree
-		 * @param {number} degree - (0 ~ 359.9 degree)
-		 * @param {boolean} [silent=false] - set true then not fire custom event
-		 */
-		Slider.prototype.moveHue = function (degree, silent) {
-		    var newTop = 0,
-		        absMin,
-		        maxValue;
-
-		    absMin = Math.abs(HUEBAR_POS_LIMIT_RANGE[0]);
-		    maxValue = absMin + HUEBAR_POS_LIMIT_RANGE[1];
-
-		    degree = degree || 0;
-		    newTop = maxValue * degree / HUE_WHEEL_MAX - absMin;
-
-		    this._moveHueHandle(newTop, silent);
-		};
-
-		/**
-		 * Move hue bar handle by supplied percent
-		 * @private
-		 * @param {number} y - pixel value to move hue handle
-		 */
-		Slider.prototype._moveHueByPosition = function (y) {
-		    var offset = HUEBAR_POS_LIMIT_RANGE[0];
-
-		    this._moveHueHandle(y + offset);
-		};
-
-		/**
-		 * Get huebar handle position by color degree
-		 * @returns {number} degree (0 ~ 359.9 degree)
-		 */
-		Slider.prototype.getHue = function () {
-		    var handle = this.huebarHandleElement,
-		        position = svgvml.getTranslateXY(handle),
-		        absMin,
-		        maxValue;
-
-		    absMin = Math.abs(HUEBAR_POS_LIMIT_RANGE[0]);
-		    maxValue = absMin + HUEBAR_POS_LIMIT_RANGE[1];
-
-		    // maxValue : 359.99 = pos.y : x
-		    return (position[0] + absMin) * HUE_WHEEL_MAX / maxValue;
-		};
-
-		/**
-		 * Get HSV value from slider
-		 * @returns {number[]} hsv values
-		 */
-		Slider.prototype.getHSV = function () {
-		    var sv = this.getSaturationAndValue(),
-		        h = this.getHue();
-
-		    return [h].concat(sv);
-		};
-
-		/**
-		 * Get RGB value from slider
-		 * @returns {number[]} RGB value
-		 */
-		Slider.prototype.getRGB = function () {
-		    return colorutil.hsvToRGB.apply(null, this.getHSV());
-		};
-
-		/**********
-		 * Drag event handler
-		 **********/
-
-		/**
-		 * Cache immutable data when dragging or click view
-		 * @param {object} event - Click, DragStart event.
-		 * @returns {object} cached data.
-		 */
-		Slider.prototype._prepareColorSliderForMouseEvent = function (event) {
-		    var options = this.options,
-		        sliderPart = domutil.closest(event.target, '.' + options.cssPrefix + 'slider-part'),
-		        cache;
-
-		    cache = this._dragDataCache = {
-		        isColorSlider: domutil.hasClass(sliderPart, options.cssPrefix + 'slider-left'),
-		        parentElement: sliderPart
-		    };
-
-		    return cache;
-		};
-
-		/**
-		 * Click event handler
-		 * @param {object} clickEvent - Click event from Drag module
-		 */
-		Slider.prototype._onClick = function (clickEvent) {
-		    var cache = this._prepareColorSliderForMouseEvent(clickEvent),
-		        mousePos = domevent.getMousePosition(clickEvent.originEvent, cache.parentElement);
-
-		    if (cache.isColorSlider) {
-		        this._moveColorSliderByPosition(mousePos[0], mousePos[1]);
-		    } else {
-		        this._moveHueByPosition(mousePos[1]);
-		    }
-
-		    this._dragDataCache = null;
-		};
-
-		/**
-		 * DragStart event handler
-		 * @param {object} dragStartEvent - dragStart event data from Drag#dragStart
-		 */
-		Slider.prototype._onDragStart = function (dragStartEvent) {
-		    this._prepareColorSliderForMouseEvent(dragStartEvent);
-		};
-
-		/**
-		 * Drag event handler
-		 * @param {Drag#drag} dragEvent - drag event data
-		 */
-		Slider.prototype._onDrag = function (dragEvent) {
-		    var cache = this._dragDataCache,
-		        mousePos = domevent.getMousePosition(dragEvent.originEvent, cache.parentElement);
-
-		    if (cache.isColorSlider) {
-		        this._moveColorSliderByPosition(mousePos[0], mousePos[1]);
-		    } else {
-		        this._moveHueByPosition(mousePos[1]);
-		    }
-		};
-
-		/**
-		 * Drag#dragEnd event handler
-		 */
-		Slider.prototype._onDragEnd = function () {
-		    this._dragDataCache = null;
-		};
-
-		util.CustomEvents.mixin(Slider);
-
-		module.exports = Slider;
-
-	/***/ }),
-	/* 19 */
-	/***/ (function(module, exports, __webpack_require__) {
-
-		/**
-		 * @fileoverview module for manipulate SVG or VML object
-		 * @author NHN Ent. FE Development Team <dl_javascript@nhnent.com>
-		 */
-
-		'use strict';
-
-		var util = __webpack_require__(8);
-		var PARSE_TRANSLATE_NUM_REGEX = /[\.\-0-9]+/g;
-		var SVG_HUE_HANDLE_RIGHT_POS = -6;
-
-		/* istanbul ignore next */
-		var svgvml = {
-		    /**
-		     * Return true when browser is below IE8.
-		     * @returns {boolean} is old browser?
-		     */
-		    isOldBrowser: function () {
-		        var _isOldBrowser = svgvml._isOldBrowser;
-
-		        if (!util.isExisty(_isOldBrowser)) {
-		            svgvml._isOldBrowser = _isOldBrowser = util.browser.msie && util.browser.version < 9;
-		        }
-
-		        return _isOldBrowser;
-		    },
-
-		    /**
-		     * Get translate transform value
-		     * @param {SVG|VML} obj - svg or vml object that want to know translate x, y
-		     * @returns {number[]} translated coordinates [x, y]
-		     */
-		    getTranslateXY: function (obj) {
-		        var temp;
-
-		        if (svgvml.isOldBrowser()) {
-		            temp = obj.style;
-
-		            return [parseFloat(temp.top), parseFloat(temp.left)];
-		        }
-
-		        temp = obj.getAttribute('transform');
-
-		        if (!temp) {
-		            return [0, 0];
-		        }
-
-		        temp = temp.match(PARSE_TRANSLATE_NUM_REGEX);
-
-		        // need caution for difference of VML, SVG coordinates system.
-		        // translate command need X coords in first parameter. but VML is use CSS coordinate system(top, left)
-		        return [parseFloat(temp[1]), parseFloat(temp[0])];
-		    },
-
-		    /**
-		     * Set translate transform value
-		     * @param {SVG|VML} obj - SVG or VML object to setting translate transform.
-		     * @param {number} x - translate X value
-		     * @param {number} y - translate Y value
-		     */
-		    setTranslateXY: function (obj, x, y) {
-		        if (svgvml.isOldBrowser()) {
-		            obj.style.left = x + 'px';
-		            obj.style.top = y + 'px';
-		        } else {
-		            obj.setAttribute('transform', 'translate(' + x + ',' + y + ')');
-		        }
-		    },
-
-		    /**
-		     * Set translate only Y value
-		     * @param {SVG|VML} obj - SVG or VML object to setting translate transform.
-		     * @param {number} y - translate Y value
-		     */
-		    setTranslateY: function (obj, y) {
-		        if (svgvml.isOldBrowser()) {
-		            obj.style.top = y + 'px';
-		        } else {
-		            obj.setAttribute('transform', 'translate(' + SVG_HUE_HANDLE_RIGHT_POS + ',' + y + ')');
-		        }
-		    },
-
-		    /**
-		     * Set stroke color to SVG or VML object
-		     * @param {SVG|VML} obj - SVG or VML object to setting stroke color
-		     * @param {string} colorStr - color string
-		     */
-		    setStrokeColor: function (obj, colorStr) {
-		        if (svgvml.isOldBrowser()) {
-		            obj.strokecolor = colorStr;
-		        } else {
-		            obj.setAttribute('stroke', colorStr);
-		        }
-		    },
-
-		    /**
-		     * Set gradient stop color to SVG, VML object.
-		     * @param {SVG|VML} obj - SVG, VML object to applying gradient stop color
-		     * @param {string} colorStr - color string
-		     */
-		    setGradientColorStop: function (obj, colorStr) {
-		        if (svgvml.isOldBrowser()) {
-		            obj.color = colorStr;
-		        } else {
-		            obj.setAttribute('stop-color', colorStr);
-		        }
-		    }
-
-		};
-
-		module.exports = svgvml;
-
-	/***/ }),
-	/* 20 */
-	/***/ (function(module, exports, __webpack_require__) {
-
-		/* WEBPACK VAR INJECTION */(function(global) {/**
-		 * @fileoverview Slider template
-		 * @author NHN Ent. FE Development Team <dl_javascript@nhnent.com>
-		 */
-
-		'use strict';
-
-		var util = __webpack_require__(8);
-
-		var layout = ['<div class="{{cssPrefix}}slider-left {{cssPrefix}}slider-part">{{slider}}</div>', '<div class="{{cssPrefix}}slider-right {{cssPrefix}}slider-part">{{huebar}}</div>'].join('\n');
-
-		var SVGSlider = ['<svg class="{{cssPrefix}}svg {{cssPrefix}}svg-slider">', '<defs>', '<linearGradient id="{{cssPrefix}}svg-fill-color" x1="0%" y1="0%" x2="100%" y2="0%">', '<stop offset="0%" stop-color="rgb(255,255,255)" />', '<stop class="{{cssPrefix}}slider-basecolor" offset="100%" stop-color="rgb(255,0,0)" />', '</linearGradient>', '<linearGradient id="{{cssPrefix}}svn-fill-black" x1="0%" y1="0%" x2="0%" y2="100%">', '<stop offset="0%" style="stop-color:rgb(0,0,0);stop-opacity:0" />', '<stop offset="100%" style="stop-color:rgb(0,0,0);stop-opacity:1" />', '</linearGradient>', '</defs>', '<rect width="100%" height="100%" fill="url(#{{cssPrefix}}svg-fill-color)"></rect>', '<rect width="100%" height="100%" fill="url(#{{cssPrefix}}svn-fill-black)"></rect>', '<path transform="translate(0,0)" class="{{cssPrefix}}slider-handle" d="M0 7.5 L15 7.5 M7.5 15 L7.5 0 M2 7 a5.5 5.5 0 1 1 0 1 Z" stroke="black" stroke-width="0.75" fill="none" />', '</svg>'].join('\n');
-
-		var VMLSlider = ['<div class="{{cssPrefix}}vml-slider">', '<v:rect strokecolor="none" class="{{cssPrefix}}vml {{cssPrefix}}vml-slider-bg">', '<v:fill class="{{cssPrefix}}vml {{cssPrefix}}slider-basecolor" type="gradient" method="none" color="#ff0000" color2="#fff" angle="90" />', '</v:rect>', '<v:rect strokecolor="#ccc" class="{{cssPrefix}}vml {{cssPrefix}}vml-slider-bg">', '<v:fill type="gradient" method="none" color="black" color2="white" o:opacity2="0%" class="{{cssPrefix}}vml" />', '</v:rect>', '<v:shape class="{{cssPrefix}}vml {{cssPrefix}}slider-handle" coordsize="1 1" style="width:1px;height:1px;"' + 'path="m 0,7 l 14,7 m 7,14 l 7,0 ar 12,12 2,2 z" filled="false" stroked="true" />', '</div>'].join('\n');
-
-		var SVGHuebar = ['<svg class="{{cssPrefix}}svg {{cssPrefix}}svg-huebar">', '<defs>', '<linearGradient id="g" x1="0%" y1="0%" x2="0%" y2="100%">', '<stop offset="0%" stop-color="rgb(255,0,0)" />', '<stop offset="16.666%" stop-color="rgb(255,255,0)" />', '<stop offset="33.333%" stop-color="rgb(0,255,0)" />', '<stop offset="50%" stop-color="rgb(0,255,255)" />', '<stop offset="66.666%" stop-color="rgb(0,0,255)" />', '<stop offset="83.333%" stop-color="rgb(255,0,255)" />', '<stop offset="100%" stop-color="rgb(255,0,0)" />', '</linearGradient>', '</defs>', '<rect width="18px" height="100%" fill="url(#g)"></rect>', '<path transform="translate(-6,-3)" class="{{cssPrefix}}huebar-handle" d="M0 0 L4 4 L0 8 L0 0 Z" fill="black" stroke="none" />', '</svg>'].join('\n');
-
-		var VMLHuebar = ['<div class="{{cssPrefix}}vml-huebar">', '<v:rect strokecolor="#ccc" class="{{cssPrefix}}vml {{cssPrefix}}vml-huebar-bg">', '<v:fill type="gradient" method="none" colors="' + '0% rgb(255,0,0), 16.666% rgb(255,255,0), 33.333% rgb(0,255,0), 50% rgb(0,255,255), 66.666% rgb(0,0,255), 83.333% rgb(255,0,255), 100% rgb(255,0,0)' + '" angle="180" class="{{cssPrefix}}vml" />', '</v:rect>', '<v:shape class="{{cssPrefix}}vml {{cssPrefix}}huebar-handle" coordsize="1 1" style="width:1px;height:1px;position:absolute;z-index:1;right:22px;top:-3px;"' + 'path="m 0,0 l 4,4 l 0,8 l 0,0 z" filled="true" fillcolor="black" stroked="false" />', '</div>'].join('\n');
-
-		var isOldBrowser = util.browser.msie && util.browser.version < 9;
-
-		if (isOldBrowser) {
-		    global.document.namespaces.add('v', 'urn:schemas-microsoft-com:vml');
-		}
-
-		module.exports = {
-		    layout: layout,
-		    slider: isOldBrowser ? VMLSlider : SVGSlider,
-		    huebar: isOldBrowser ? VMLHuebar : SVGHuebar
-		};
-		/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
-
-	/***/ })
-	/******/ ])
-	});
-	;
+	module.exports = __WEBPACK_EXTERNAL_MODULE_82__;
 
 /***/ }),
 /* 83 */
@@ -9982,7 +6938,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	'use strict';
 
 	Object.defineProperty(exports, "__esModule", {
-	  value: true
+	    value: true
 	});
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -9995,95 +6951,122 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @ignore
 	 */
 	var Submenu = function () {
-	  function Submenu(subMenuElement, _ref) {
-	    var name = _ref.name,
-	        iconStyle = _ref.iconStyle,
-	        menuBarPosition = _ref.menuBarPosition,
-	        templateHtml = _ref.templateHtml;
+	    /**
+	     * @param {HTMLElement} subMenuElement - submenu dom element
+	     * @param {Locale} locale - translate text
+	     * @param {string} name - name of sub menu
+	     * @param {Object} iconStyle - style of icon
+	     * @param {string} menuBarPosition - position of menu
+	     * @param {*} templateHtml - template for SubMenuElement
+	     */
+	    function Submenu(subMenuElement, _ref) {
+	        var locale = _ref.locale,
+	            name = _ref.name,
+	            iconStyle = _ref.iconStyle,
+	            menuBarPosition = _ref.menuBarPosition,
+	            templateHtml = _ref.templateHtml;
 
-	    _classCallCheck(this, Submenu);
+	        _classCallCheck(this, Submenu);
 
-	    this.selector = function (str) {
-	      return subMenuElement.querySelector(str);
-	    };
-	    this.menuBarPosition = menuBarPosition;
-	    this.toggleDirection = menuBarPosition === 'top' ? 'down' : 'up';
-	    this._makeSubMenuElement(subMenuElement, {
-	      name: name,
-	      iconStyle: iconStyle,
-	      templateHtml: templateHtml
-	    });
-	  }
-
-	  /**
-	   * Get butten type
-	   * @param {HTMLElement} button - event target element
-	   * @param {array} buttonNames - Array of button names
-	   * @returns {string} - button type
-	   */
-
-
-	  _createClass(Submenu, [{
-	    key: 'getButtonType',
-	    value: function getButtonType(button, buttonNames) {
-	      return button.className.match(RegExp('(' + buttonNames.join('|') + ')'))[0];
+	        this.selector = function (str) {
+	            return subMenuElement.querySelector(str);
+	        };
+	        this.menuBarPosition = menuBarPosition;
+	        this.toggleDirection = menuBarPosition === 'top' ? 'down' : 'up';
+	        this.colorPickerControls = [];
+	        this._makeSubMenuElement(subMenuElement, {
+	            locale: locale,
+	            name: name,
+	            iconStyle: iconStyle,
+	            templateHtml: templateHtml
+	        });
 	    }
 
-	    /**
-	     * Get butten type
-	     * @param {HTMLElement} target - event target element
-	     * @param {string} removeClass - remove class name
-	     * @param {string} addClass - add class name
-	     */
+	    _createClass(Submenu, [{
+	        key: 'colorPickerChangeShow',
+	        value: function colorPickerChangeShow(occurredControl) {
+	            this.colorPickerControls.forEach(function (pickerControl) {
+	                if (occurredControl !== pickerControl) {
+	                    pickerControl.hide();
+	                }
+	            });
+	        }
 
-	  }, {
-	    key: 'changeClass',
-	    value: function changeClass(target, removeClass, addClass) {
-	      target.classList.remove(removeClass);
-	      target.classList.add(addClass);
-	    }
+	        /**
+	         * Get butten type
+	         * @param {HTMLElement} button - event target element
+	         * @param {array} buttonNames - Array of button names
+	         * @returns {string} - button type
+	         */
 
-	    /**
-	     * Interface method whose implementation is optional.
-	     * Returns the menu to its default state.
-	     */
+	    }, {
+	        key: 'getButtonType',
+	        value: function getButtonType(button, buttonNames) {
+	            return button.className.match(RegExp('(' + buttonNames.join('|') + ')'))[0];
+	        }
 
-	  }, {
-	    key: 'changeStandbyMode',
-	    value: function changeStandbyMode() {}
+	        /**
+	         * Get butten type
+	         * @param {HTMLElement} target - event target element
+	         * @param {string} removeClass - remove class name
+	         * @param {string} addClass - add class name
+	         */
 
-	    /**
-	     * Interface method whose implementation is optional.
-	     * Executed when the menu starts.
-	     */
+	    }, {
+	        key: 'changeClass',
+	        value: function changeClass(target, removeClass, addClass) {
+	            target.classList.remove(removeClass);
+	            target.classList.add(addClass);
+	        }
 
-	  }, {
-	    key: 'changeStartMode',
-	    value: function changeStartMode() {}
+	        /**
+	         * Interface method whose implementation is optional.
+	         * Returns the menu to its default state.
+	         */
 
-	    /**
-	     * Make submenu dom element
-	     * @param {HTMLElement} subMenuElement - subment dom element
-	     * @param {Object} iconStyle -  icon style
-	     * @private
-	     */
+	    }, {
+	        key: 'changeStandbyMode',
+	        value: function changeStandbyMode() {}
 
-	  }, {
-	    key: '_makeSubMenuElement',
-	    value: function _makeSubMenuElement(subMenuElement, _ref2) {
-	      var name = _ref2.name,
-	          iconStyle = _ref2.iconStyle,
-	          templateHtml = _ref2.templateHtml;
+	        /**
+	         * Interface method whose implementation is optional.
+	         * Executed when the menu starts.
+	         */
 
-	      var iconSubMenu = document.createElement('div');
-	      iconSubMenu.className = 'tui-image-editor-menu-' + name;
-	      iconSubMenu.innerHTML = templateHtml({ iconStyle: iconStyle });
+	    }, {
+	        key: 'changeStartMode',
+	        value: function changeStartMode() {}
 
-	      subMenuElement.appendChild(iconSubMenu);
-	    }
-	  }]);
+	        /**
+	         * Make submenu dom element
+	         * @param {HTMLElement} subMenuElement - submenu dom element
+	         * @param {Locale} locale - translate text
+	         * @param {string} name - submenu name
+	         * @param {Object} iconStyle -  icon style
+	         * @param {*} templateHtml - template for SubMenuElement
+	         * @private
+	         */
 
-	  return Submenu;
+	    }, {
+	        key: '_makeSubMenuElement',
+	        value: function _makeSubMenuElement(subMenuElement, _ref2) {
+	            var locale = _ref2.locale,
+	                name = _ref2.name,
+	                iconStyle = _ref2.iconStyle,
+	                templateHtml = _ref2.templateHtml;
+
+	            var iconSubMenu = document.createElement('div');
+	            iconSubMenu.className = 'tui-image-editor-menu-' + name;
+	            iconSubMenu.innerHTML = templateHtml({
+	                locale: locale,
+	                iconStyle: iconStyle
+	            });
+
+	            subMenuElement.appendChild(iconSubMenu);
+	        }
+	    }]);
+
+	    return Submenu;
 	}();
 
 	exports.default = Submenu;
@@ -10092,17 +7075,24 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 85 */
 /***/ (function(module, exports) {
 
-	"use strict";
+	'use strict';
 
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
 
+	/**
+	 * @param {Locale} locale - Translate text
+	 * @param {Object} normal - iconStyle
+	 * @param {Object} active - iconStyle
+	 * @returns {string}
+	 */
 	exports.default = function (_ref) {
-	    var _ref$iconStyle = _ref.iconStyle,
+	    var locale = _ref.locale,
+	        _ref$iconStyle = _ref.iconStyle,
 	        normal = _ref$iconStyle.normal,
 	        active = _ref$iconStyle.active;
-	    return "\n    <ul class=\"tui-image-editor-submenu-item\">\n        <li id=\"tie-shape-button\">\n            <div class=\"tui-image-editor-button rect\">\n                <div>\n                    <svg class=\"svg_ic-submenu\">\n                        <use xlink:href=\"" + normal.path + "#" + normal.name + "-ic-shape-rectangle\"\n                            class=\"normal\"/>\n                        <use xlink:href=\"" + active.path + "#" + active.name + "-ic-shape-rectangle\"\n                            class=\"active\"/>\n                    </svg>\n                </div>\n                <label> Rectangle </label>\n            </div>\n            <div class=\"tui-image-editor-button circle\">\n                <div>\n                    <svg class=\"svg_ic-submenu\">\n                        <use xlink:href=\"" + normal.path + "#" + normal.name + "-ic-shape-circle\"\n                            class=\"normal\"/>\n                        <use xlink:href=\"" + active.path + "#" + active.name + "-ic-shape-circle\"\n                            class=\"active\"/>\n                    </svg>\n                </div>\n                <label> Circle </label>\n            </div>\n            <div class=\"tui-image-editor-button triangle\">\n                <div>\n                    <svg class=\"svg_ic-submenu\">\n                        <use xlink:href=\"" + normal.path + "#" + normal.name + "-ic-shape-triangle\"\n                            class=\"normal\"/>\n                        <use xlink:href=\"" + active.path + "#" + active.name + "-ic-shape-triangle\"\n                            class=\"active\"/>\n                    </svg>\n                </div>\n                <label> Triangle </label>\n            </div>\n        </li>\n        <li class=\"tui-image-editor-partition\">\n            <div></div>\n        </li>\n        <li id=\"tie-shape-color-button\">\n            <div id=\"tie-color-fill\" title=\"fill\"></div>\n            <div id=\"tie-color-stroke\" title=\"stroke\"></div>\n        </li>\n        <li class=\"tui-image-editor-partition only-left-right\">\n            <div></div>\n        </li>\n        <li class=\"tui-image-editor-newline tui-image-editor-range-wrap\">\n            <label class=\"range\">Stroke</label>\n            <div id=\"tie-stroke-range\"></div>\n            <input id=\"tie-stroke-range-value\" class=\"tui-image-editor-range-value\" value=\"0\" />\n        </li>\n    </ul>\n";
+	    return '\n    <ul class="tui-image-editor-submenu-item">\n        <li id="tie-shape-button">\n            <div class="tui-image-editor-button rect">\n                <div>\n                    <svg class="svg_ic-submenu">\n                        <use xlink:href="' + normal.path + '#' + normal.name + '-ic-shape-rectangle"\n                            class="normal"/>\n                        <use xlink:href="' + active.path + '#' + active.name + '-ic-shape-rectangle"\n                            class="active"/>\n                    </svg>\n                </div>\n                <label> ' + locale.localize('Rectangle') + ' </label>\n            </div>\n            <div class="tui-image-editor-button circle">\n                <div>\n                    <svg class="svg_ic-submenu">\n                        <use xlink:href="' + normal.path + '#' + normal.name + '-ic-shape-circle"\n                            class="normal"/>\n                        <use xlink:href="' + active.path + '#' + active.name + '-ic-shape-circle"\n                            class="active"/>\n                    </svg>\n                </div>\n                <label> ' + locale.localize('Circle') + ' </label>\n            </div>\n            <div class="tui-image-editor-button triangle">\n                <div>\n                    <svg class="svg_ic-submenu">\n                        <use xlink:href="' + normal.path + '#' + normal.name + '-ic-shape-triangle"\n                            class="normal"/>\n                        <use xlink:href="' + active.path + '#' + active.name + '-ic-shape-triangle"\n                            class="active"/>\n                    </svg>\n                </div>\n                <label> ' + locale.localize('Triangle') + ' </label>\n            </div>\n        </li>\n        <li class="tui-image-editor-partition">\n            <div></div>\n        </li>\n        <li id="tie-shape-color-button">\n            <div id="tie-color-fill" title="' + locale.localize('Fill') + '"></div>\n            <div id="tie-color-stroke" title="' + locale.localize('Stroke') + '"></div>\n        </li>\n        <li class="tui-image-editor-partition only-left-right">\n            <div></div>\n        </li>\n        <li class="tui-image-editor-newline tui-image-editor-range-wrap">\n            <label class="range">' + locale.localize('Stroke') + '</label>\n            <div id="tie-stroke-range"></div>\n            <input id="tie-stroke-range-value" class="tui-image-editor-range-value" value="0" />\n        </li>\n    </ul>\n';
 	};
 
 /***/ }),
@@ -10116,6 +7106,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _tuiCodeSnippet = __webpack_require__(3);
+
+	var _tuiCodeSnippet2 = _interopRequireDefault(_tuiCodeSnippet);
 
 	var _submenuBase = __webpack_require__(84);
 
@@ -10142,12 +7136,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	    _inherits(Crop, _Submenu);
 
 	    function Crop(subMenuElement, _ref) {
-	        var iconStyle = _ref.iconStyle,
+	        var locale = _ref.locale,
+	            iconStyle = _ref.iconStyle,
 	            menuBarPosition = _ref.menuBarPosition;
 
 	        _classCallCheck(this, Crop);
 
 	        var _this = _possibleConstructorReturn(this, (Crop.__proto__ || Object.getPrototypeOf(Crop)).call(this, subMenuElement, {
+	            locale: locale,
 	            name: 'crop',
 	            iconStyle: iconStyle,
 	            menuBarPosition: menuBarPosition,
@@ -10155,10 +7151,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }));
 
 	        _this.status = 'active';
+
 	        _this._els = {
 	            apply: _this.selector('#tie-crop-button .apply'),
-	            cancel: _this.selector('#tie-crop-button .cancel')
+	            cancel: _this.selector('#tie-crop-button .cancel'),
+	            preset: _this.selector('#tie-crop-preset-button')
 	        };
+
+	        _this.defaultPresetButton = _this._els.preset.querySelector('.preset-none');
 	        return _this;
 	    }
 
@@ -10167,6 +7167,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	     * @param {Object} actions - actions for crop
 	     *   @param {Function} actions.crop - crop action
 	     *   @param {Function} actions.cancel - cancel action
+	     *   @param {Function} actions.preset - draw rectzone at a predefined ratio
 	     */
 
 
@@ -10184,6 +7185,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	            this._els.cancel.addEventListener('click', function () {
 	                _this2.actions.cancel();
 	                _this2._els.apply.classList.remove('active');
+	            });
+
+	            this._els.preset.addEventListener('click', function (event) {
+	                var button = event.target.closest('.tui-image-editor-button.preset');
+	                if (button) {
+	                    var _button$className$mat = button.className.match(/preset-[^\s]+/),
+	                        presetType = _button$className$mat[0];
+
+	                    _this2._setPresetButtonActive(button);
+	                    _this2.actions.preset(presetType);
+	                }
 	            });
 	        }
 
@@ -10205,6 +7217,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        key: 'changeStandbyMode',
 	        value: function changeStandbyMode() {
 	            this.actions.stopDrawingMode();
+	            this._setPresetButtonActive();
 	        }
 
 	        /**
@@ -10221,6 +7234,26 @@ return /******/ (function(modules) { // webpackBootstrap
 	                this._els.apply.classList.remove('active');
 	            }
 	        }
+
+	        /**
+	         * Set preset button to active status
+	         * @param {HTMLElement} button - event target element
+	         * @private
+	         */
+
+	    }, {
+	        key: '_setPresetButtonActive',
+	        value: function _setPresetButtonActive() {
+	            var button = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : this.defaultPresetButton;
+
+	            _tuiCodeSnippet2.default.forEach([].slice.call(this._els.preset.querySelectorAll('.preset')), function (presetButton) {
+	                presetButton.classList.remove('active');
+	            });
+
+	            if (button) {
+	                button.classList.add('active');
+	            }
+	        }
 	    }]);
 
 	    return Crop;
@@ -10232,17 +7265,24 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 87 */
 /***/ (function(module, exports) {
 
-	"use strict";
+	'use strict';
 
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
 
+	/**
+	 * @param {Locale} locale - Translate text
+	 * @param {Object} normal - iconStyle
+	 * @param {Object} active - iconStyle
+	 * @returns {string}
+	 */
 	exports.default = function (_ref) {
-	    var _ref$iconStyle = _ref.iconStyle,
+	    var locale = _ref.locale,
+	        _ref$iconStyle = _ref.iconStyle,
 	        normal = _ref$iconStyle.normal,
 	        active = _ref$iconStyle.active;
-	    return "\n    <ul class=\"tui-image-editor-submenu-item\">\n        <li id=\"tie-crop-button\" class=\"apply\">\n            <div class=\"tui-image-editor-button apply\">\n                <svg class=\"svg_ic-menu\">\n                    <use xlink:href=\"" + normal.path + "#" + normal.name + "-ic-apply\" class=\"normal\"/>\n                    <use xlink:href=\"" + active.path + "#" + active.name + "-ic-apply\" class=\"active\"/>\n                </svg>\n                <label>\n                    Apply\n                </label>\n            </div>\n            <div class=\"tui-image-editor-button cancel\">\n                <svg class=\"svg_ic-menu\">\n                    <use xlink:href=\"" + normal.path + "#" + normal.name + "-ic-cancel\" class=\"normal\"/>\n                    <use xlink:href=\"" + active.path + "#" + active.name + "-ic-cancel\" class=\"active\"/>\n                </svg>\n                <label>\n                    Cancel\n                </label>\n            </div>\n        </li>\n    </ul>\n";
+	    return '\n    <ul class="tui-image-editor-submenu-item">\n        <li id="tie-crop-preset-button">\n            <div class="tui-image-editor-button preset preset-none active">\n                <div>\n                    <svg class="svg_ic-submenu">\n                        <use xlink:href="' + normal.path + '#' + normal.name + '-ic-shape-rectangle"\n                            class="normal"/>\n                        <use xlink:href="' + active.path + '#' + active.name + '-ic-shape-rectangle"\n                            class="active"/>\n                    </svg>\n                </div>\n                <label> ' + locale.localize('Custom') + ' </label>\n            </div>\n            <div class="tui-image-editor-button preset preset-square">\n                <div>\n                    <svg class="svg_ic-submenu">\n                        <use xlink:href="' + normal.path + '#' + normal.name + '-ic-crop"\n                            class="normal"/>\n                        <use xlink:href="' + active.path + '#' + active.name + '-ic-crop"\n                            class="active"/>\n                    </svg>\n                </div>\n                <label> ' + locale.localize('Square') + ' </label>\n            </div>\n            <div class="tui-image-editor-button preset preset-3-2">\n                <div>\n                    <svg class="svg_ic-submenu">\n                        <use xlink:href="' + normal.path + '#' + normal.name + '-ic-crop"\n                            class="normal"/>\n                        <use xlink:href="' + active.path + '#' + active.name + '-ic-crop"\n                            class="active"/>\n                    </svg>\n                </div>\n                <label> ' + locale.localize('3:2') + ' </label>\n            </div>\n            <div class="tui-image-editor-button preset preset-4-3">\n                <div>\n                    <svg class="svg_ic-submenu">\n                        <use xlink:href="' + normal.path + '#' + normal.name + '-ic-crop"\n                            class="normal"/>\n                        <use xlink:href="' + active.path + '#' + active.name + '-ic-crop"\n                            class="active"/>\n                    </svg>\n                </div>\n                <label> ' + locale.localize('4:3') + ' </label>\n            </div>\n            <div class="tui-image-editor-button preset preset-5-4">\n                <div>\n                    <svg class="svg_ic-submenu">\n                        <use xlink:href="' + normal.path + '#' + normal.name + '-ic-crop"\n                            class="normal"/>\n                        <use xlink:href="' + active.path + '#' + active.name + '-ic-crop"\n                            class="active"/>\n                    </svg>\n                </div>\n                <label> ' + locale.localize('5:4') + ' </label>\n            </div>\n            <div class="tui-image-editor-button preset preset-7-5">\n                <div>\n                    <svg class="svg_ic-submenu">\n                        <use xlink:href="' + normal.path + '#' + normal.name + '-ic-crop"\n                            class="normal"/>\n                        <use xlink:href="' + active.path + '#' + active.name + '-ic-crop"\n                            class="active"/>\n                    </svg>\n                </div>\n                <label> ' + locale.localize('7:5') + ' </label>\n            </div>\n            <div class="tui-image-editor-button preset preset-16-9">\n                <div>\n                    <svg class="svg_ic-submenu">\n                        <use xlink:href="' + normal.path + '#' + normal.name + '-ic-crop"\n                            class="normal"/>\n                        <use xlink:href="' + active.path + '#' + active.name + '-ic-crop"\n                            class="active"/>\n                    </svg>\n                </div>\n                <label> ' + locale.localize('16:9') + ' </label>\n            </div>\n        </li>\n        <li class="tui-image-editor-partition tui-image-editor-newline">\n        </li>\n        <li class="tui-image-editor-partition only-left-right">\n            <div></div>\n        </li>\n        <li id="tie-crop-button" class="action">\n            <div class="tui-image-editor-button apply">\n                <svg class="svg_ic-menu">\n                    <use xlink:href="' + normal.path + '#' + normal.name + '-ic-apply" class="normal"/>\n                    <use xlink:href="' + active.path + '#' + active.name + '-ic-apply" class="active"/>\n                </svg>\n                <label>\n                    ' + locale.localize('Apply') + '\n                </label>\n            </div>\n            <div class="tui-image-editor-button cancel">\n                <svg class="svg_ic-menu">\n                    <use xlink:href="' + normal.path + '#' + normal.name + '-ic-cancel" class="normal"/>\n                    <use xlink:href="' + active.path + '#' + active.name + '-ic-cancel" class="active"/>\n                </svg>\n                <label>\n                    ' + locale.localize('Cancel') + '\n                </label>\n            </div>\n        </li>\n    </ul>\n';
 	};
 
 /***/ }),
@@ -10286,12 +7326,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	    _inherits(Flip, _Submenu);
 
 	    function Flip(subMenuElement, _ref) {
-	        var iconStyle = _ref.iconStyle,
+	        var locale = _ref.locale,
+	            iconStyle = _ref.iconStyle,
 	            menuBarPosition = _ref.menuBarPosition;
 
 	        _classCallCheck(this, Flip);
 
 	        var _this = _possibleConstructorReturn(this, (Flip.__proto__ || Object.getPrototypeOf(Flip)).call(this, subMenuElement, {
+	            locale: locale,
 	            name: 'flip',
 	            iconStyle: iconStyle,
 	            menuBarPosition: menuBarPosition,
@@ -10365,17 +7407,24 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 89 */
 /***/ (function(module, exports) {
 
-	"use strict";
+	'use strict';
 
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
 
+	/**
+	 * @param {Locale} locale - Translate text
+	 * @param {Object} normal - iconStyle
+	 * @param {Object} active - iconStyle
+	 * @returns {string}
+	 */
 	exports.default = function (_ref) {
-	    var _ref$iconStyle = _ref.iconStyle,
+	    var locale = _ref.locale,
+	        _ref$iconStyle = _ref.iconStyle,
 	        normal = _ref$iconStyle.normal,
 	        active = _ref$iconStyle.active;
-	    return "\n    <ul id=\"tie-flip-button\" class=\"tui-image-editor-submenu-item\">\n        <li>\n            <div class=\"tui-image-editor-button flipX\">\n                <div>\n                    <svg class=\"svg_ic-submenu\">\n                        <use xlink:href=\"" + normal.path + "#" + normal.name + "-ic-flip-x\" class=\"normal\"/>\n                        <use xlink:href=\"" + active.path + "#" + active.name + "-ic-flip-x\" class=\"active\"/>\n                    </svg>\n                </div>\n                <label>\n                    Flip X\n                </label>\n            </div>\n            <div class=\"tui-image-editor-button flipY\">\n                <div>\n                    <svg class=\"svg_ic-submenu\">\n                        <use xlink:href=\"" + normal.path + "#" + normal.name + "-ic-flip-y\" class=\"normal\"/>\n                        <use xlink:href=\"" + active.path + "#" + active.name + "-ic-flip-y\" class=\"active\"/>\n                    </svg>\n                </div>\n                <label>\n                    Flip Y\n                </label>\n            </div>\n        </li>\n        <li class=\"tui-image-editor-partition\">\n            <div></div>\n        </li>\n        <li>\n            <div class=\"tui-image-editor-button resetFlip\">\n                <div>\n                    <svg class=\"svg_ic-submenu\">\n                        <use xlink:href=\"" + normal.path + "#" + normal.name + "-ic-flip-reset\"\n                            class=\"normal\"/>\n                        <use xlink:href=\"" + active.path + "#" + active.name + "-ic-flip-reset\"\n                            class=\"active\"/>\n                    </svg>\n                </div>\n                <label>\n                    Reset\n                </label>\n            </div>\n        </li>\n    </ul>\n";
+	    return '\n    <ul id="tie-flip-button" class="tui-image-editor-submenu-item">\n        <li>\n            <div class="tui-image-editor-button flipX">\n                <div>\n                    <svg class="svg_ic-submenu">\n                        <use xlink:href="' + normal.path + '#' + normal.name + '-ic-flip-x" class="normal"/>\n                        <use xlink:href="' + active.path + '#' + active.name + '-ic-flip-x" class="active"/>\n                    </svg>\n                </div>\n                <label>\n                    ' + locale.localize('Flip X') + '\n                </label>\n            </div>\n            <div class="tui-image-editor-button flipY">\n                <div>\n                    <svg class="svg_ic-submenu">\n                        <use xlink:href="' + normal.path + '#' + normal.name + '-ic-flip-y" class="normal"/>\n                        <use xlink:href="' + active.path + '#' + active.name + '-ic-flip-y" class="active"/>\n                    </svg>\n                </div>\n                <label>\n                    ' + locale.localize('Flip Y') + '\n                </label>\n            </div>\n        </li>\n        <li class="tui-image-editor-partition">\n            <div></div>\n        </li>\n        <li>\n            <div class="tui-image-editor-button resetFlip">\n                <div>\n                    <svg class="svg_ic-submenu">\n                        <use xlink:href="' + normal.path + '#' + normal.name + '-ic-flip-reset"\n                            class="normal"/>\n                        <use xlink:href="' + active.path + '#' + active.name + '-ic-flip-reset"\n                            class="active"/>\n                    </svg>\n                </div>\n                <label>\n                    ' + locale.localize('Reset') + '\n                </label>\n            </div>\n        </li>\n    </ul>\n';
 	};
 
 /***/ }),
@@ -10427,12 +7476,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	    _inherits(Rotate, _Submenu);
 
 	    function Rotate(subMenuElement, _ref) {
-	        var iconStyle = _ref.iconStyle,
+	        var locale = _ref.locale,
+	            iconStyle = _ref.iconStyle,
 	            menuBarPosition = _ref.menuBarPosition;
 
 	        _classCallCheck(this, Rotate);
 
 	        var _this = _possibleConstructorReturn(this, (Rotate.__proto__ || Object.getPrototypeOf(Rotate)).call(this, subMenuElement, {
+	            locale: locale,
 	            name: 'rotate',
 	            iconStyle: iconStyle,
 	            menuBarPosition: menuBarPosition,
@@ -10509,17 +7560,24 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 91 */
 /***/ (function(module, exports) {
 
-	"use strict";
+	'use strict';
 
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
 
+	/**
+	 * @param {Locale} locale - Translate text
+	 * @param {Object} normal - iconStyle
+	 * @param {Object} active - iconStyle
+	 * @returns {string}
+	 */
 	exports.default = function (_ref) {
-	    var _ref$iconStyle = _ref.iconStyle,
+	    var locale = _ref.locale,
+	        _ref$iconStyle = _ref.iconStyle,
 	        normal = _ref$iconStyle.normal,
 	        active = _ref$iconStyle.active;
-	    return "\n    <ul class=\"tui-image-editor-submenu-item\">\n        <li id=\"tie-retate-button\">\n            <div class=\"tui-image-editor-button clockwise\">\n                <div>\n                    <svg class=\"svg_ic-submenu\">\n                        <use xlink:href=\"" + normal.path + "#" + normal.name + "-ic-rotate-clockwise\"\n                            class=\"normal\"/>\n                        <use xlink:href=\"" + active.path + "#" + active.name + "-ic-rotate-clockwise\"\n                            class=\"active\"/>\n                    </svg>\n                </div>\n                <label> 30 </label>\n            </div>\n            <div class=\"tui-image-editor-button counterclockwise\">\n                <div>\n                    <svg class=\"svg_ic-submenu\">\n                        <use xlink:href=\"" + normal.path + "#" + normal.name + "-ic-rotate-counterclockwise\"\n                            class=\"normal\"/>\n                        <use xlink:href=\"" + active.path + "#" + active.name + "-ic-rotate-counterclockwise\"\n                            class=\"active\"/>\n                    </svg>\n                </div>\n                <label> -30 </label>\n            </div>\n        </li>\n        <li class=\"tui-image-editor-partition only-left-right\">\n            <div></div>\n        </li>\n        <li class=\"tui-image-editor-newline tui-image-editor-range-wrap\">\n            <label class=\"range\">Range</label>\n            <div id=\"tie-rotate-range\"></div>\n            <input id=\"tie-ratate-range-value\" class=\"tui-image-editor-range-value\" value=\"0\" />\n        </li>\n    </ul>\n";
+	    return '\n    <ul class="tui-image-editor-submenu-item">\n        <li id="tie-retate-button">\n            <div class="tui-image-editor-button clockwise">\n                <div>\n                    <svg class="svg_ic-submenu">\n                        <use xlink:href="' + normal.path + '#' + normal.name + '-ic-rotate-clockwise"\n                            class="normal"/>\n                        <use xlink:href="' + active.path + '#' + active.name + '-ic-rotate-clockwise"\n                            class="active"/>\n                    </svg>\n                </div>\n                <label> 30 </label>\n            </div>\n            <div class="tui-image-editor-button counterclockwise">\n                <div>\n                    <svg class="svg_ic-submenu">\n                        <use xlink:href="' + normal.path + '#' + normal.name + '-ic-rotate-counterclockwise"\n                            class="normal"/>\n                        <use xlink:href="' + active.path + '#' + active.name + '-ic-rotate-counterclockwise"\n                            class="active"/>\n                    </svg>\n                </div>\n                <label> -30 </label>\n            </div>\n        </li>\n        <li class="tui-image-editor-partition only-left-right">\n            <div></div>\n        </li>\n        <li class="tui-image-editor-newline tui-image-editor-range-wrap">\n            <label class="range">' + locale.localize('Range') + '</label>\n            <div id="tie-rotate-range"></div>\n            <input id="tie-ratate-range-value" class="tui-image-editor-range-value" value="0" />\n        </li>\n    </ul>\n';
 	};
 
 /***/ }),
@@ -10571,12 +7629,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	    _inherits(Text, _Submenu);
 
 	    function Text(subMenuElement, _ref) {
-	        var iconStyle = _ref.iconStyle,
+	        var locale = _ref.locale,
+	            iconStyle = _ref.iconStyle,
 	            menuBarPosition = _ref.menuBarPosition;
 
 	        _classCallCheck(this, Text);
 
 	        var _this = _possibleConstructorReturn(this, (Text.__proto__ || Object.getPrototypeOf(Text)).call(this, subMenuElement, {
+	            locale: locale,
 	            name: 'text',
 	            iconStyle: iconStyle,
 	            menuBarPosition: menuBarPosition,
@@ -10761,17 +7821,24 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 93 */
 /***/ (function(module, exports) {
 
-	"use strict";
+	'use strict';
 
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
 
+	/**
+	 * @param {Locale} locale - Translate text
+	 * @param {Object} normal - iconStyle
+	 * @param {Object} active - iconStyle
+	 * @returns {string}
+	 */
 	exports.default = function (_ref) {
-	    var _ref$iconStyle = _ref.iconStyle,
+	    var locale = _ref.locale,
+	        _ref$iconStyle = _ref.iconStyle,
 	        normal = _ref$iconStyle.normal,
 	        active = _ref$iconStyle.active;
-	    return "\n    <ul class=\"tui-image-editor-submenu-item\">\n        <li id=\"tie-text-effect-button\">\n            <div class=\"tui-image-editor-button bold\">\n                <div>\n                    <svg class=\"svg_ic-submenu\">\n                    <use xlink:href=\"" + normal.path + "#" + normal.name + "-ic-text-bold\" class=\"normal\"/>\n                    <use xlink:href=\"" + active.path + "#" + active.name + "-ic-text-bold\" class=\"active\"/>\n                    </svg>\n                </div>\n                <label> Bold </label>\n            </div>\n            <div class=\"tui-image-editor-button italic\">\n                <div>\n                    <svg class=\"svg_ic-submenu\">\n                    <use xlink:href=\"" + normal.path + "#" + normal.name + "-ic-text-italic\" class=\"normal\"/>\n                    <use xlink:href=\"" + active.path + "#" + active.name + "-ic-text-italic\" class=\"active\"/>\n                    </svg>\n                </div>\n                <label> Italic </label>\n            </div>\n            <div class=\"tui-image-editor-button underline\">\n                <div>\n                    <svg class=\"svg_ic-submenu\">\n                        <use xlink:href=\"" + normal.path + "#" + normal.name + "-ic-text-underline\"\n                            class=\"normal\"/>\n                        <use xlink:href=\"" + active.path + "#" + active.name + "-ic-text-underline\"\n                            class=\"active\"/>\n                    </svg>\n                </div>\n                <label> Underline </label>\n            </div>\n        </li>\n        <li class=\"tui-image-editor-partition\">\n            <div></div>\n        </li>\n        <li id=\"tie-text-align-button\">\n            <div class=\"tui-image-editor-button left\">\n                <div>\n                    <svg class=\"svg_ic-submenu\">\n                     <use xlink:href=\"" + normal.path + "#" + normal.name + "-ic-text-align-left\"\n                        class=\"normal\"/>\n                     <use xlink:href=\"" + active.path + "#" + active.name + "-ic-text-align-left\"\n                        class=\"active\"/>\n                    </svg>\n                </div>\n                <label> left </label>\n            </div>\n            <div class=\"tui-image-editor-button center\">\n                <div>\n                    <svg class=\"svg_ic-submenu\">\n                     <use xlink:href=\"" + normal.path + "#" + normal.name + "-ic-text-align-center\"\n                        class=\"normal\"/>\n                     <use xlink:href=\"" + active.path + "#" + active.name + "-ic-text-align-center\"\n                        class=\"active\"/>\n                    </svg>\n                </div>\n                <label> center </label>\n            </div>\n            <div class=\"tui-image-editor-button right\">\n                <div>\n                    <svg class=\"svg_ic-submenu\">\n                     <use xlink:href=\"" + normal.path + "#" + normal.name + "-ic-text-align-right\"\n                        class=\"normal\"/>\n                     <use xlink:href=\"" + active.path + "#" + active.name + "-ic-text-align-right\"\n                        class=\"active\"/>\n                    </svg>\n                </div>\n                <label> right </label>\n            </div>\n        </li>\n        <li class=\"tui-image-editor-partition\">\n            <div></div>\n        </li>\n        <li>\n            <div id=\"tie-text-color\" title=\"Color\"></div>\n        </li>\n        <li class=\"tui-image-editor-partition only-left-right\">\n            <div></div>\n        </li>\n        <li class=\"tui-image-editor-newline tui-image-editor-range-wrap\">\n            <label class=\"range\">Text size</label>\n            <div id=\"tie-text-range\"></div>\n            <input id=\"tie-text-range-value\" class=\"tui-image-editor-range-value\" value=\"0\" />\n        </li>\n    </ul>\n";
+	    return '\n    <ul class="tui-image-editor-submenu-item">\n        <li id="tie-text-effect-button">\n            <div class="tui-image-editor-button bold">\n                <div>\n                    <svg class="svg_ic-submenu">\n                    <use xlink:href="' + normal.path + '#' + normal.name + '-ic-text-bold" class="normal"/>\n                    <use xlink:href="' + active.path + '#' + active.name + '-ic-text-bold" class="active"/>\n                    </svg>\n                </div>\n                <label> ' + locale.localize('Bold') + ' </label>\n            </div>\n            <div class="tui-image-editor-button italic">\n                <div>\n                    <svg class="svg_ic-submenu">\n                    <use xlink:href="' + normal.path + '#' + normal.name + '-ic-text-italic" class="normal"/>\n                    <use xlink:href="' + active.path + '#' + active.name + '-ic-text-italic" class="active"/>\n                    </svg>\n                </div>\n                <label> ' + locale.localize('Italic') + ' </label>\n            </div>\n            <div class="tui-image-editor-button underline">\n                <div>\n                    <svg class="svg_ic-submenu">\n                        <use xlink:href="' + normal.path + '#' + normal.name + '-ic-text-underline"\n                            class="normal"/>\n                        <use xlink:href="' + active.path + '#' + active.name + '-ic-text-underline"\n                            class="active"/>\n                    </svg>\n                </div>\n                <label> ' + locale.localize('Underline') + ' </label>\n            </div>\n        </li>\n        <li class="tui-image-editor-partition">\n            <div></div>\n        </li>\n        <li id="tie-text-align-button">\n            <div class="tui-image-editor-button left">\n                <div>\n                    <svg class="svg_ic-submenu">\n                     <use xlink:href="' + normal.path + '#' + normal.name + '-ic-text-align-left"\n                        class="normal"/>\n                     <use xlink:href="' + active.path + '#' + active.name + '-ic-text-align-left"\n                        class="active"/>\n                    </svg>\n                </div>\n                <label> ' + locale.localize('Left') + ' </label>\n            </div>\n            <div class="tui-image-editor-button center">\n                <div>\n                    <svg class="svg_ic-submenu">\n                     <use xlink:href="' + normal.path + '#' + normal.name + '-ic-text-align-center"\n                        class="normal"/>\n                     <use xlink:href="' + active.path + '#' + active.name + '-ic-text-align-center"\n                        class="active"/>\n                    </svg>\n                </div>\n                <label> ' + locale.localize('Center') + ' </label>\n            </div>\n            <div class="tui-image-editor-button right">\n                <div>\n                    <svg class="svg_ic-submenu">\n                     <use xlink:href="' + normal.path + '#' + normal.name + '-ic-text-align-right"\n                        class="normal"/>\n                     <use xlink:href="' + active.path + '#' + active.name + '-ic-text-align-right"\n                        class="active"/>\n                    </svg>\n                </div>\n                <label> ' + locale.localize('Right') + ' </label>\n            </div>\n        </li>\n        <li class="tui-image-editor-partition">\n            <div></div>\n        </li>\n        <li>\n            <div id="tie-text-color" title="' + locale.localize('Color') + '"></div>\n        </li>\n        <li class="tui-image-editor-partition only-left-right">\n            <div></div>\n        </li>\n        <li class="tui-image-editor-newline tui-image-editor-range-wrap">\n            <label class="range">' + locale.localize('Text size') + '</label>\n            <div id="tie-text-range"></div>\n            <input id="tie-text-range-value" class="tui-image-editor-range-value" value="0" />\n        </li>\n    </ul>\n';
 	};
 
 /***/ }),
@@ -10815,12 +7882,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	    _inherits(Mask, _Submenu);
 
 	    function Mask(subMenuElement, _ref) {
-	        var iconStyle = _ref.iconStyle,
+	        var locale = _ref.locale,
+	            iconStyle = _ref.iconStyle,
 	            menuBarPosition = _ref.menuBarPosition;
 
 	        _classCallCheck(this, Mask);
 
 	        var _this = _possibleConstructorReturn(this, (Mask.__proto__ || Object.getPrototypeOf(Mask)).call(this, subMenuElement, {
+	            locale: locale,
 	            name: 'mask',
 	            iconStyle: iconStyle,
 	            menuBarPosition: menuBarPosition,
@@ -10898,17 +7967,24 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 95 */
 /***/ (function(module, exports) {
 
-	"use strict";
+	'use strict';
 
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
 
+	/**
+	 * @param {Locale} locale - Translate text
+	 * @param {Object} normal - iconStyle
+	 * @param {Object} active - iconStyle
+	 * @returns {string}
+	 */
 	exports.default = function (_ref) {
-	    var _ref$iconStyle = _ref.iconStyle,
+	    var locale = _ref.locale,
+	        _ref$iconStyle = _ref.iconStyle,
 	        normal = _ref$iconStyle.normal,
 	        active = _ref$iconStyle.active;
-	    return "\n    <ul class=\"tui-image-editor-submenu-item\">\n        <li>\n            <div class=\"tui-image-editor-button\">\n                <div>\n                    <input type=\"file\" accept=\"image/*\" id=\"tie-mask-image-file\">\n                    <svg class=\"svg_ic-submenu\">\n                        <use xlink:href=\"" + normal.path + "#" + normal.name + "-ic-mask-load\" class=\"normal\"/>\n                        <use xlink:href=\"" + active.path + "#" + active.name + "-ic-mask-load\" class=\"active\"/>\n                    </svg>\n                </div>\n                <label> Load Mask Image </label>\n            </div>\n        </li>\n        <li class=\"tui-image-editor-partition only-left-right\">\n            <div></div>\n        </li>\n        <li id=\"tie-mask-apply\" class=\"tui-image-editor-newline apply\">\n            <div class=\"tui-image-editor-button apply\">\n                <svg class=\"svg_ic-menu\">\n                    <use xlink:href=\"" + normal.path + "#" + normal.name + "-ic-apply\" class=\"normal\"/>\n                    <use xlink:href=\"" + active.path + "#" + active.name + "-ic-apply\" class=\"active\"/>\n                </svg>\n                <label>\n                    Apply\n                </label>\n            </div>\n        </li>\n    </ul>\n";
+	    return '\n    <ul class="tui-image-editor-submenu-item">\n        <li>\n            <div class="tui-image-editor-button">\n                <div>\n                    <input type="file" accept="image/*" id="tie-mask-image-file">\n                    <svg class="svg_ic-submenu">\n                        <use xlink:href="' + normal.path + '#' + normal.name + '-ic-mask-load" class="normal"/>\n                        <use xlink:href="' + active.path + '#' + active.name + '-ic-mask-load" class="active"/>\n                    </svg>\n                </div>\n                <label> ' + locale.localize('Load Mask Image') + ' </label>\n            </div>\n        </li>\n        <li class="tui-image-editor-partition only-left-right">\n            <div></div>\n        </li>\n        <li id="tie-mask-apply" class="tui-image-editor-newline apply" style="margin-top: 22px;margin-bottom: 5px">\n            <div class="tui-image-editor-button apply">\n                <svg class="svg_ic-menu">\n                    <use xlink:href="' + normal.path + '#' + normal.name + '-ic-apply" class="normal"/>\n                    <use xlink:href="' + active.path + '#' + active.name + '-ic-apply" class="active"/>\n                </svg>\n                <label>\n                    ' + locale.localize('Apply') + '\n                </label>\n            </div>\n        </li>\n    </ul>\n';
 	};
 
 /***/ }),
@@ -10960,12 +8036,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	    _inherits(Icon, _Submenu);
 
 	    function Icon(subMenuElement, _ref) {
-	        var iconStyle = _ref.iconStyle,
+	        var locale = _ref.locale,
+	            iconStyle = _ref.iconStyle,
 	            menuBarPosition = _ref.menuBarPosition;
 
 	        _classCallCheck(this, Icon);
 
 	        var _this = _possibleConstructorReturn(this, (Icon.__proto__ || Object.getPrototypeOf(Icon)).call(this, subMenuElement, {
+	            locale: locale,
 	            name: 'icon',
 	            iconStyle: iconStyle,
 	            menuBarPosition: menuBarPosition,
@@ -11125,17 +8203,24 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 97 */
 /***/ (function(module, exports) {
 
-	"use strict";
+	'use strict';
 
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
 
+	/**
+	 * @param {Locale} locale - Translate text
+	 * @param {Object} normal - iconStyle
+	 * @param {Object} active - iconStyle
+	 * @returns {string}
+	 */
 	exports.default = function (_ref) {
-	    var _ref$iconStyle = _ref.iconStyle,
+	    var locale = _ref.locale,
+	        _ref$iconStyle = _ref.iconStyle,
 	        normal = _ref$iconStyle.normal,
 	        active = _ref$iconStyle.active;
-	    return "\n    <ul class=\"tui-image-editor-submenu-item\">\n        <li id=\"tie-icon-add-button\">\n            <div class=\"tui-image-editor-button\" data-icontype=\"icon-arrow\">\n                <div>\n                    <svg class=\"svg_ic-submenu\">\n                        <use xlink:href=\"" + normal.path + "#" + normal.name + "-ic-icon-arrow\"\n                            class=\"normal\"/>\n                        <use xlink:href=\"" + active.path + "#" + active.name + "-ic-icon-arrow\"\n                            class=\"active\"/>\n                    </svg>\n                </div>\n                <label>\n                    Arrow\n                </label>\n            </div>\n            <div class=\"tui-image-editor-button\" data-icontype=\"icon-arrow-2\">\n                <div>\n                    <svg class=\"svg_ic-submenu\">\n                        <use xlink:href=\"" + normal.path + "#" + normal.name + "-ic-icon-arrow-2\"\n                            class=\"normal\"/>\n                        <use xlink:href=\"" + active.path + "#" + active.name + "-ic-icon-arrow-2\"\n                            class=\"active\"/>\n                    </svg>\n                </div>\n                <label>\n                    Arrow-2\n                </label>\n            </div>\n            <div class=\"tui-image-editor-button\" data-icontype=\"icon-arrow-3\">\n                <div>\n                    <svg class=\"svg_ic-submenu\">\n                        <use xlink:href=\"" + normal.path + "#" + normal.name + "-ic-icon-arrow-3\"\n                            class=\"normal\"/>\n                        <use xlink:href=\"" + active.path + "#" + active.name + "-ic-icon-arrow-3\"\n                            class=\"active\"/>\n                    </svg>\n                </div>\n                <label>\n                    Arrow-3\n                </label>\n            </div>\n            <div class=\"tui-image-editor-button\" data-icontype=\"icon-star\">\n                <div>\n                    <svg class=\"svg_ic-submenu\">\n                        <use xlink:href=\"" + normal.path + "#" + normal.name + "-ic-icon-star\" class=\"normal\"/>\n                        <use xlink:href=\"" + active.path + "#" + active.name + "-ic-icon-star\" class=\"active\"/>\n                    </svg>\n                </div>\n                <label>\n                    Star-1\n                </label>\n            </div>\n            <div class=\"tui-image-editor-button\" data-icontype=\"icon-star-2\">\n                <div>\n                    <svg class=\"svg_ic-submenu\">\n                        <use xlink:href=\"" + normal.path + "#" + normal.name + "-ic-icon-star-2\"\n                            class=\"normal\"/>\n                        <use xlink:href=\"" + active.path + "#" + active.name + "-ic-icon-star-2\"\n                            class=\"active\"/>\n                    </svg>\n                </div>\n                <label>\n                    Star-2\n                </label>\n            </div>\n\n            <div class=\"tui-image-editor-button\" data-icontype=\"icon-polygon\">\n                <div>\n                    <svg class=\"svg_ic-submenu\">\n                        <use xlink:href=\"" + normal.path + "#" + normal.name + "-ic-icon-polygon\"\n                            class=\"normal\"/>\n                        <use xlink:href=\"" + normal.path + "#" + normal.name + "-ic-icon-polygon\"\n                            class=\"active\"/>\n                    </svg>\n                </div>\n                <label>\n                    Polygon\n                </label>\n            </div>\n\n            <div class=\"tui-image-editor-button\" data-icontype=\"icon-location\">\n                <div>\n                    <svg class=\"svg_ic-submenu\">\n                        <use xlink:href=\"" + normal.path + "#" + normal.name + "-ic-icon-location\"\n                            class=\"normal\"/>\n                        <use xlink:href=\"" + active.path + "#" + active.name + "-ic-icon-location\"\n                            class=\"active\"/>\n                    </svg>\n                </div>\n                <label>\n                    Location\n                </label>\n            </div>\n\n            <div class=\"tui-image-editor-button\" data-icontype=\"icon-heart\">\n                <div>\n                    <svg class=\"svg_ic-submenu\">\n                        <use xlink:href=\"" + normal.path + "#" + normal.name + "-ic-icon-heart\"\n                            class=\"normal\"/>\n                        <use xlink:href=\"" + active.path + "#" + active.name + "-ic-icon-heart\"\n                            class=\"active\"/>\n                    </svg>\n                </div>\n                <label>\n                    Heart\n                </label>\n            </div>\n\n            <div class=\"tui-image-editor-button\" data-icontype=\"icon-bubble\">\n                <div>\n                    <svg class=\"svg_ic-submenu\">\n                        <use xlink:href=\"" + normal.path + "#" + normal.name + "-ic-icon-bubble\"\n                            class=\"normal\"/>\n                        <use xlink:href=\"" + active.path + "#" + active.name + "-ic-icon-bubble\"\n                            class=\"active\"/>\n                    </svg>\n                </div>\n                <label>\n                    Bubble\n                </label>\n            </div>\n        </li>\n        <li class=\"tui-image-editor-partition\">\n            <div></div>\n        </li>\n        <li id=\"tie-icon-add-button\">\n            <div class=\"tui-image-editor-button\">\n                <div>\n                    <input type=\"file\" accept=\"image/*\" id=\"tie-icon-image-file\">\n                    <svg class=\"svg_ic-submenu\">\n                        <use xlink:href=\"" + normal.path + "#" + normal.name + "-ic-icon-load\" class=\"normal\"/>\n                        <use xlink:href=\"" + active.path + "#" + active.name + "-ic-icon-load\" class=\"active\"/>\n                    </svg>\n                </div>\n                <label>\n                    Custom icon\n                </label>\n            </div>\n        </li>\n        <li class=\"tui-image-editor-partition\">\n            <div></div>\n        </li>\n        <li>\n            <div id=\"tie-icon-color\" title=\"Color\"></div>\n        </li>\n    </ul>\n";
+	    return '\n    <ul class="tui-image-editor-submenu-item">\n        <li id="tie-icon-add-button">\n            <div class="tui-image-editor-button" data-icontype="icon-arrow">\n                <div>\n                    <svg class="svg_ic-submenu">\n                        <use xlink:href="' + normal.path + '#' + normal.name + '-ic-icon-arrow"\n                            class="normal"/>\n                        <use xlink:href="' + active.path + '#' + active.name + '-ic-icon-arrow"\n                            class="active"/>\n                    </svg>\n                </div>\n                <label>\n                    ' + locale.localize('Arrow') + '\n                </label>\n            </div>\n            <div class="tui-image-editor-button" data-icontype="icon-arrow-2">\n                <div>\n                    <svg class="svg_ic-submenu">\n                        <use xlink:href="' + normal.path + '#' + normal.name + '-ic-icon-arrow-2"\n                            class="normal"/>\n                        <use xlink:href="' + active.path + '#' + active.name + '-ic-icon-arrow-2"\n                            class="active"/>\n                    </svg>\n                </div>\n                <label>\n                    ' + locale.localize('Arrow-2') + '\n                </label>\n            </div>\n            <div class="tui-image-editor-button" data-icontype="icon-arrow-3">\n                <div>\n                    <svg class="svg_ic-submenu">\n                        <use xlink:href="' + normal.path + '#' + normal.name + '-ic-icon-arrow-3"\n                            class="normal"/>\n                        <use xlink:href="' + active.path + '#' + active.name + '-ic-icon-arrow-3"\n                            class="active"/>\n                    </svg>\n                </div>\n                <label>\n                    ' + locale.localize('Arrow-3') + '\n                </label>\n            </div>\n            <div class="tui-image-editor-button" data-icontype="icon-star">\n                <div>\n                    <svg class="svg_ic-submenu">\n                        <use xlink:href="' + normal.path + '#' + normal.name + '-ic-icon-star" class="normal"/>\n                        <use xlink:href="' + active.path + '#' + active.name + '-ic-icon-star" class="active"/>\n                    </svg>\n                </div>\n                <label>\n                    ' + locale.localize('Star-1') + '\n                </label>\n            </div>\n            <div class="tui-image-editor-button" data-icontype="icon-star-2">\n                <div>\n                    <svg class="svg_ic-submenu">\n                        <use xlink:href="' + normal.path + '#' + normal.name + '-ic-icon-star-2"\n                            class="normal"/>\n                        <use xlink:href="' + active.path + '#' + active.name + '-ic-icon-star-2"\n                            class="active"/>\n                    </svg>\n                </div>\n                <label>\n                    ' + locale.localize('Star-2') + '\n                </label>\n            </div>\n\n            <div class="tui-image-editor-button" data-icontype="icon-polygon">\n                <div>\n                    <svg class="svg_ic-submenu">\n                        <use xlink:href="' + normal.path + '#' + normal.name + '-ic-icon-polygon"\n                            class="normal"/>\n                        <use xlink:href="' + normal.path + '#' + normal.name + '-ic-icon-polygon"\n                            class="active"/>\n                    </svg>\n                </div>\n                <label>\n                    ' + locale.localize('Polygon') + '\n                </label>\n            </div>\n\n            <div class="tui-image-editor-button" data-icontype="icon-location">\n                <div>\n                    <svg class="svg_ic-submenu">\n                        <use xlink:href="' + normal.path + '#' + normal.name + '-ic-icon-location"\n                            class="normal"/>\n                        <use xlink:href="' + active.path + '#' + active.name + '-ic-icon-location"\n                            class="active"/>\n                    </svg>\n                </div>\n                <label>\n                    ' + locale.localize('Location') + '\n                </label>\n            </div>\n\n            <div class="tui-image-editor-button" data-icontype="icon-heart">\n                <div>\n                    <svg class="svg_ic-submenu">\n                        <use xlink:href="' + normal.path + '#' + normal.name + '-ic-icon-heart"\n                            class="normal"/>\n                        <use xlink:href="' + active.path + '#' + active.name + '-ic-icon-heart"\n                            class="active"/>\n                    </svg>\n                </div>\n                <label>\n                    ' + locale.localize('Heart') + '\n                </label>\n            </div>\n\n            <div class="tui-image-editor-button" data-icontype="icon-bubble">\n                <div>\n                    <svg class="svg_ic-submenu">\n                        <use xlink:href="' + normal.path + '#' + normal.name + '-ic-icon-bubble"\n                            class="normal"/>\n                        <use xlink:href="' + active.path + '#' + active.name + '-ic-icon-bubble"\n                            class="active"/>\n                    </svg>\n                </div>\n                <label>\n                    ' + locale.localize('Bubble') + '\n                </label>\n            </div>\n        </li>\n        <li class="tui-image-editor-partition">\n            <div></div>\n        </li>\n        <li id="tie-icon-add-button">\n            <div class="tui-image-editor-button" style="margin:0">\n                <div>\n                    <input type="file" accept="image/*" id="tie-icon-image-file">\n                    <svg class="svg_ic-submenu">\n                        <use xlink:href="' + normal.path + '#' + normal.name + '-ic-icon-load" class="normal"/>\n                        <use xlink:href="' + active.path + '#' + active.name + '-ic-icon-load" class="active"/>\n                    </svg>\n                </div>\n                <label>\n                    ' + locale.localize('Custom icon') + '\n                </label>\n            </div>\n        </li>\n        <li class="tui-image-editor-partition">\n            <div></div>\n        </li>\n        <li>\n            <div id="tie-icon-color" title="' + locale.localize('Color') + '"></div>\n        </li>\n    </ul>\n';
 	};
 
 /***/ }),
@@ -11192,12 +8277,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	    _inherits(Draw, _Submenu);
 
 	    function Draw(subMenuElement, _ref) {
-	        var iconStyle = _ref.iconStyle,
+	        var locale = _ref.locale,
+	            iconStyle = _ref.iconStyle,
 	            menuBarPosition = _ref.menuBarPosition;
 
 	        _classCallCheck(this, Draw);
 
 	        var _this = _possibleConstructorReturn(this, (Draw.__proto__ || Object.getPrototypeOf(Draw)).call(this, subMenuElement, {
+	            locale: locale,
 	            name: 'draw',
 	            iconStyle: iconStyle,
 	            menuBarPosition: menuBarPosition,
@@ -11348,17 +8435,24 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 99 */
 /***/ (function(module, exports) {
 
-	"use strict";
+	'use strict';
 
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
 
+	/**
+	 * @param {Locale} locale - Translate text
+	 * @param {Object} normal - iconStyle
+	 * @param {Object} active - iconStyle
+	 * @returns {string}
+	 */
 	exports.default = function (_ref) {
-	    var _ref$iconStyle = _ref.iconStyle,
+	    var locale = _ref.locale,
+	        _ref$iconStyle = _ref.iconStyle,
 	        normal = _ref$iconStyle.normal,
 	        active = _ref$iconStyle.active;
-	    return "\n    <ul class=\"tui-image-editor-submenu-item\">\n        <li id=\"tie-draw-line-select-button\">\n            <div class=\"tui-image-editor-button free\">\n                <div>\n                    <svg class=\"svg_ic-submenu\">\n                        <use xlink:href=\"" + normal.path + "#" + normal.name + "-ic-draw-free\" class=\"normal\"/>\n                        <use xlink:href=\"" + active.path + "#" + active.name + "-ic-draw-free\" class=\"active\"/>\n                    </svg>\n                </div>\n                <label>\n                    Free\n                </label>\n            </div>\n            <div class=\"tui-image-editor-button line\">\n                <div>\n                    <svg class=\"svg_ic-submenu\">\n                        <use xlink:href=\"" + normal.path + "#" + normal.name + "-ic-draw-line\" class=\"normal\"/>\n                        <use xlink:href=\"" + active.path + "#" + active.name + "-ic-draw-line\" class=\"active\"/>\n                    </svg>\n                </div>\n                <label>\n                    Straight\n                </label>\n            </div>\n        </li>\n        <li class=\"tui-image-editor-partition\">\n            <div></div>\n        </li>\n        <li>\n            <div id=\"tie-draw-color\" title=\"Color\"></div>\n        </li>\n        <li class=\"tui-image-editor-partition only-left-right\">\n            <div></div>\n        </li>\n        <li class=\"tui-image-editor-newline tui-image-editor-range-wrap\">\n            <label class=\"range\">Range</label>\n            <div id=\"tie-draw-range\"></div>\n            <input id=\"tie-draw-range-value\" class=\"tui-image-editor-range-value\" value=\"0\" />\n        </li>\n    </ul>\n";
+	    return '\n    <ul class="tui-image-editor-submenu-item">\n        <li id="tie-draw-line-select-button">\n            <div class="tui-image-editor-button free">\n                <div>\n                    <svg class="svg_ic-submenu">\n                        <use xlink:href="' + normal.path + '#' + normal.name + '-ic-draw-free" class="normal"/>\n                        <use xlink:href="' + active.path + '#' + active.name + '-ic-draw-free" class="active"/>\n                    </svg>\n                </div>\n                <label>\n                    ' + locale.localize('Free') + '\n                </label>\n            </div>\n            <div class="tui-image-editor-button line">\n                <div>\n                    <svg class="svg_ic-submenu">\n                        <use xlink:href="' + normal.path + '#' + normal.name + '-ic-draw-line" class="normal"/>\n                        <use xlink:href="' + active.path + '#' + active.name + '-ic-draw-line" class="active"/>\n                    </svg>\n                </div>\n                <label>\n                    ' + locale.localize('Straight') + '\n                </label>\n            </div>\n        </li>\n        <li class="tui-image-editor-partition">\n            <div></div>\n        </li>\n        <li>\n            <div id="tie-draw-color" title="' + locale.localize('Color') + '"></div>\n        </li>\n        <li class="tui-image-editor-partition only-left-right">\n            <div></div>\n        </li>\n        <li class="tui-image-editor-newline tui-image-editor-range-wrap">\n            <label class="range">' + locale.localize('Range') + '</label>\n            <div id="tie-draw-range"></div>\n            <input id="tie-draw-range-value" class="tui-image-editor-range-value" value="0" />\n        </li>\n    </ul>\n';
 	};
 
 /***/ }),
@@ -11419,17 +8513,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	    _inherits(Filter, _Submenu);
 
 	    function Filter(subMenuElement, _ref) {
-	        var iconStyle = _ref.iconStyle,
+	        var locale = _ref.locale,
+	            iconStyle = _ref.iconStyle,
 	            menuBarPosition = _ref.menuBarPosition;
 
 	        _classCallCheck(this, Filter);
 
 	        var _this = _possibleConstructorReturn(this, (Filter.__proto__ || Object.getPrototypeOf(Filter)).call(this, subMenuElement, {
+	            locale: locale,
 	            name: 'filter',
 	            iconStyle: iconStyle,
 	            menuBarPosition: menuBarPosition,
 	            templateHtml: _filter2.default
 	        }));
+
+	        _this.selectBoxShow = false;
 
 	        _this.checkedMap = {};
 	        _this._makeControlElement();
@@ -11450,12 +8548,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            var applyFilter = _ref2.applyFilter;
 
-	            var changeRangeValue = function changeRangeValue(filterName) {
-	                var apply = _this2.checkedMap[filterName].checked;
-	                var type = filterName;
-
-	                applyFilter(apply, type, _this2._getFilterOption(type));
-	            };
+	            var changeRangeValue = this._changeRangeValue.bind(this, applyFilter);
 
 	            _tuiCodeSnippet2.default.forEach(FILTER_OPTIONS, function (filterName) {
 	                var filterCheckElement = _this2.selector('#tie-' + filterName);
@@ -11506,6 +8599,32 @@ return /******/ (function(modules) { // webpackBootstrap
 	            this._els.blendType.addEventListener('click', function (event) {
 	                return event.stopPropagation();
 	            });
+	            this._els.filterMultiplyColor.on('changeShow', this.colorPickerChangeShow.bind(this));
+	            this._els.filterTintColor.on('changeShow', this.colorPickerChangeShow.bind(this));
+	            this._els.filterBlendColor.on('changeShow', this.colorPickerChangeShow.bind(this));
+	        }
+
+	        /**
+	         * Add event for filter
+	         * @param {Function} applyFilter - actions for firter
+	         * @param {string} filterName - filter name
+	         */
+
+	    }, {
+	        key: '_changeRangeValue',
+	        value: function _changeRangeValue(applyFilter, filterName) {
+	            var apply = this.checkedMap[filterName].checked;
+	            var type = filterName;
+
+	            var checkboxGroup = this.checkedMap[filterName].closest('.tui-image-editor-checkbox-group');
+	            if (checkboxGroup) {
+	                if (apply) {
+	                    checkboxGroup.classList.remove('tui-image-editor-disabled');
+	                } else {
+	                    checkboxGroup.classList.add('tui-image-editor-disabled');
+	                }
+	            }
+	            applyFilter(apply, type, this._getFilterOption(type));
 	        }
 
 	        /**
@@ -11581,8 +8700,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	                filterMultiplyColor: new _colorpicker2.default(selector('#tie-filter-multiply-color'), '#515ce6', this.toggleDirection),
 	                filterBlendColor: new _colorpicker2.default(selector('#tie-filter-blend-color'), '#ffbb3b', this.toggleDirection)
 	            };
+
 	            this._els.tintOpacity = this._pickerWithRange(this._els.filterTintColor.pickerControl);
 	            this._els.blendType = this._pickerWithSelectbox(this._els.filterBlendColor.pickerControl);
+
+	            this.colorPickerControls.push(this._els.filterTintColor);
+	            this.colorPickerControls.push(this._els.filterMultiplyColor);
+	            this.colorPickerControls.push(this._els.filterBlendColor);
 	        }
 
 	        /**
@@ -11621,20 +8745,80 @@ return /******/ (function(modules) { // webpackBootstrap
 	        value: function _pickerWithSelectbox(pickerControl) {
 	            var selectlistWrap = document.createElement('div');
 	            var selectlist = document.createElement('select');
+	            var optionlist = document.createElement('ul');
 
 	            selectlistWrap.className = 'tui-image-editor-selectlist-wrap';
+	            optionlist.className = 'tui-image-editor-selectlist';
+
 	            selectlistWrap.appendChild(selectlist);
+	            selectlistWrap.appendChild(optionlist);
 
 	            this._makeSelectOptionList(selectlist);
 
 	            pickerControl.appendChild(selectlistWrap);
 	            pickerControl.style.height = PICKER_CONTROL_HEIGHT;
 
+	            this._drawSelectOptionList(selectlist, optionlist);
+	            this._pickerWithSelectboxForAddEvent(selectlist, optionlist);
+
 	            return selectlist;
 	        }
 
 	        /**
-	         * Make blend select option
+	         * Make selectbox option list custom style
+	         * @param {HTMLElement} selectlist - selectbox element
+	         * @param {HTMLElement} optionlist - custom option list item element
+	         * @private
+	         */
+
+	    }, {
+	        key: '_drawSelectOptionList',
+	        value: function _drawSelectOptionList(selectlist, optionlist) {
+	            var options = selectlist.querySelectorAll('option');
+	            _tuiCodeSnippet2.default.forEach(options, function (option) {
+	                var optionElement = document.createElement('li');
+	                optionElement.innerHTML = option.innerHTML;
+	                optionElement.setAttribute('data-item', option.value);
+	                optionlist.appendChild(optionElement);
+	            });
+	        }
+
+	        /**
+	         * custome selectbox custom event
+	         * @param {HTMLElement} selectlist - selectbox element
+	         * @param {HTMLElement} optionlist - custom option list item element
+	         * @private
+	         */
+
+	    }, {
+	        key: '_pickerWithSelectboxForAddEvent',
+	        value: function _pickerWithSelectboxForAddEvent(selectlist, optionlist) {
+	            var _this3 = this;
+
+	            optionlist.addEventListener('click', function (event) {
+	                var optionValue = event.target.getAttribute('data-item');
+	                var fireEvent = document.createEvent('HTMLEvents');
+
+	                selectlist.querySelector('[value="' + optionValue + '"]').selected = true;
+	                fireEvent.initEvent('change', true, true);
+
+	                selectlist.dispatchEvent(fireEvent);
+
+	                _this3.selectBoxShow = false;
+	                optionlist.style.display = 'none';
+	            });
+
+	            selectlist.addEventListener('mousedown', function (event) {
+	                event.preventDefault();
+	                _this3.selectBoxShow = !_this3.selectBoxShow;
+	                optionlist.style.display = _this3.selectBoxShow ? 'block' : 'none';
+	                optionlist.setAttribute('data-selectitem', selectlist.value);
+	                optionlist.querySelector('[data-item=\'' + selectlist.value + '\']').classList.add('active');
+	            });
+	        }
+
+	        /**
+	         * Make option list for select control
 	         * @param {HTMLElement} selectlist - blend option select list element
 	         * @private
 	         */
@@ -11662,18 +8846,66 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 101 */
 /***/ (function(module, exports) {
 
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+
+	/**
+	 * @param {Locale} locale - Translate text
+	 * @returns {string}
+	 */
+	exports.default = function (_ref) {
+	    var locale = _ref.locale;
+	    return '\n    <ul class="tui-image-editor-submenu-item">\n        <li class="tui-image-editor-submenu-align">\n            <div class="tui-image-editor-checkbox-wrap fixed-width">\n                <div class="tui-image-editor-checkbox">\n                    <input type="checkbox" id="tie-grayscale">\n                    <label for="tie-grayscale">' + locale.localize('Grayscale') + '</label>\n                </div>\n                <div class="tui-image-editor-checkbox">\n                    <input type="checkbox" id="tie-invert">\n                    <label for="tie-invert">' + locale.localize('Invert') + '</label>\n                </div>\n                <div class="tui-image-editor-checkbox">\n                    <input type="checkbox" id="tie-sepia">\n                    <label for="tie-sepia">' + locale.localize('Sepia') + '</label>\n                </div>\n                <div class="tui-image-editor-checkbox">\n                    <input type="checkbox" id="tie-sepia2">\n                    <label for="tie-sepia2">' + locale.localize('Sepia2') + '</label>\n                </div>\n                <div class="tui-image-editor-checkbox">\n                    <input type="checkbox" id="tie-blur">\n                    <label for="tie-blur">' + locale.localize('Blur') + '</label>\n                </div>\n                <div class="tui-image-editor-checkbox">\n                    <input type="checkbox" id="tie-sharpen">\n                    <label for="tie-sharpen">' + locale.localize('Sharpen') + '</label>\n                </div>\n                <div class="tui-image-editor-checkbox">\n                    <input type="checkbox" id="tie-emboss">\n                    <label for="tie-emboss">' + locale.localize('Emboss') + '</label>\n                </div>\n            </div>\n        </li>\n        <li class="tui-image-editor-partition">\n            <div></div>\n        </li>\n        <li class="tui-image-editor-submenu-align">\n            <div class="tui-image-editor-checkbox-group tui-image-editor-disabled" style="margin-bottom: 7px;">\n                <div class="tui-image-editor-checkbox-wrap">\n                    <div class="tui-image-editor-checkbox">\n                        <input type="checkbox" id="tie-remove-white">\n                        <label for="tie-remove-white">' + locale.localize('Remove White') + '</label>\n                    </div>\n                </div>\n                <div class="tui-image-editor-newline tui-image-editor-range-wrap short">\n                    <label>' + locale.localize('Threshold') + '</label>\n                    <div id="tie-removewhite-threshold-range"></div>\n                </div>\n                <div class="tui-image-editor-newline tui-image-editor-range-wrap short">\n                    <label>' + locale.localize('Distance') + '</label>\n                    <div id="tie-removewhite-distance-range"></div>\n                </div>\n            </div>\n            <div class="tui-image-editor-checkbox-group tui-image-editor-disabled">\n                <div class="tui-image-editor-newline tui-image-editor-checkbox-wrap">\n                    <div class="tui-image-editor-checkbox">\n                        <input type="checkbox" id="tie-gradient-transparency">\n                        <label for="tie-gradient-transparency">' + locale.localize('Gradient transparency') + '</label>\n                    </div>\n                </div>\n                <div class="tui-image-editor-newline tui-image-editor-range-wrap short">\n                    <label>' + locale.localize('Value') + '</label>\n                    <div id="tie-gradient-transparency-range"></div>\n                </div>\n            </div>\n        </li>\n        <li class="tui-image-editor-partition only-left-right">\n            <div></div>\n        </li>\n        <li class="tui-image-editor-submenu-align">\n            <div class="tui-image-editor-checkbox-group tui-image-editor-disabled">\n                <div class="tui-image-editor-checkbox">\n                    <input type="checkbox" id="tie-brightness">\n                    <label for="tie-brightness">' + locale.localize('Brightness') + '</label>\n                </div>\n                <div class="tui-image-editor-range-wrap short">\n                    <div id="tie-brightness-range"></div>\n                </div>\n            </div>\n            <div class="tui-image-editor-checkbox-group tui-image-editor-disabled">\n                <div class="tui-image-editor-checkbox">\n                    <input type="checkbox" id="tie-noise">\n                    <label for="tie-noise">' + locale.localize('Noise') + '</label>\n                </div>\n                <div class="tui-image-editor-range-wrap short">\n                    <div id="tie-noise-range"></div>\n                </div>\n            </div>\n\n            <div class="tui-image-editor-checkbox-group tui-image-editor-disabled">\n                <div class="tui-image-editor-checkbox">\n                    <input type="checkbox" id="tie-pixelate">\n                    <label for="tie-pixelate">' + locale.localize('Pixelate') + '</label>\n                </div>\n                <div class="tui-image-editor-range-wrap short">\n                    <div id="tie-pixelate-range"></div>\n                </div>\n            </div>\n            <div class="tui-image-editor-checkbox-group tui-image-editor-disabled">\n                <div class="tui-image-editor-newline tui-image-editor-checkbox-wrap">\n                    <div class="tui-image-editor-checkbox">\n                        <input type="checkbox" id="tie-color-filter">\n                        <label for="tie-color-filter">' + locale.localize('Color Filter') + '</label>\n                    </div>\n                </div>\n                <div class="tui-image-editor-newline tui-image-editor-range-wrap short">\n                    <label>' + locale.localize('Threshold') + '</label>\n                    <div id="tie-colorfilter-threshole-range"></div>\n                </div>\n            </div>\n        </li>\n        <li class="tui-image-editor-partition">\n            <div></div>\n        </li>\n        <li>\n            <div class="filter-color-item">\n                <div id="tie-filter-tint-color" title="' + locale.localize('Tint') + '"></div>\n                <div class="tui-image-editor-checkbox">\n                    <input type="checkbox" id="tie-tint">\n                    <label for="tie-tint"></label>\n                </div>\n            </div>\n            <div class="filter-color-item">\n                <div id="tie-filter-multiply-color" title="' + locale.localize('Multiply') + '"></div>\n                <div class="tui-image-editor-checkbox">\n                    <input type="checkbox" id="tie-multiply">\n                    <label for="tie-multiply"></label>\n                </div>\n            </div>\n            <div class="filter-color-item">\n                <div id="tie-filter-blend-color" title="' + locale.localize('Blend') + '"></div>\n                <div class="tui-image-editor-checkbox">\n                    <input type="checkbox" id="tie-blend">\n                    <label for="tie-blend"></label>\n                </div>\n            </div>\n        </li>\n    </ul>\n';
+	};
+
+/***/ }),
+/* 102 */
+/***/ (function(module, exports) {
+
 	"use strict";
 
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
 
-	exports.default = function () {
-	    return "\n    <ul class=\"tui-image-editor-submenu-item\">\n        <li class=\"tui-image-editor-submenu-align\">\n            <div class=\"tui-image-editor-checkbox-wrap fixed-width\">\n                <div class=\"tui-image-editor-checkbox\">\n                    <input type=\"checkbox\" id=\"tie-grayscale\">\n                    <label for=\"tie-grayscale\">Grayscale</label>\n                </div>\n                <div class=\"tui-image-editor-checkbox\">\n                    <input type=\"checkbox\" id=\"tie-invert\">\n                    <label for=\"tie-invert\">Invert</label>\n                </div>\n                <div class=\"tui-image-editor-checkbox\">\n                    <input type=\"checkbox\" id=\"tie-sepia\">\n                    <label for=\"tie-sepia\">Sepia</label>\n                </div>\n                <div class=\"tui-image-editor-checkbox\">\n                    <input type=\"checkbox\" id=\"tie-sepia2\">\n                    <label for=\"tie-sepia2\">Sepia2</label>\n                </div>\n                <div class=\"tui-image-editor-checkbox\">\n                    <input type=\"checkbox\" id=\"tie-blur\">\n                    <label for=\"tie-blur\">Blur</label>\n                </div>\n                <div class=\"tui-image-editor-checkbox\">\n                    <input type=\"checkbox\" id=\"tie-sharpen\">\n                    <label for=\"tie-sharpen\">Sharpen</label>\n                </div>\n                <div class=\"tui-image-editor-checkbox\">\n                    <input type=\"checkbox\" id=\"tie-emboss\">\n                    <label for=\"tie-emboss\">Emboss</label>\n                </div>\n            </div>\n        </li>\n        <li class=\"tui-image-editor-partition\">\n            <div></div>\n        </li>\n        <li class=\"tui-image-editor-submenu-align\">\n            <div>\n                <div class=\"tui-image-editor-checkbox-wrap\">\n                    <div class=\"tui-image-editor-checkbox\">\n                        <input type=\"checkbox\" id=\"tie-remove-white\">\n                        <label for=\"tie-remove-white\">Remove White</label>\n                    </div>\n                </div>\n                <div class=\"tui-image-editor-newline tui-image-editor-range-wrap short\">\n                    <label>Threshold</label>\n                    <div id=\"tie-removewhite-threshold-range\"></div>\n                </div>\n                <div class=\"tui-image-editor-newline tui-image-editor-range-wrap short\">\n                    <label>Distance</label>\n                    <div id=\"tie-removewhite-distance-range\"></div>\n                </div>\n            </div>\n            <div>\n                <div class=\"tui-image-editor-newline tui-image-editor-checkbox-wrap\">\n                    <div class=\"tui-image-editor-checkbox\">\n                        <input type=\"checkbox\" id=\"tie-gradient-transparency\">\n                        <label for=\"tie-gradient-transparency\">Grayscale</label>\n                    </div>\n                </div>\n                <div class=\"tui-image-editor-newline tui-image-editor-range-wrap short\">\n                    <label>Value</label>\n                    <div id=\"tie-gradient-transparency-range\"></div>\n                </div>\n            </div>\n        </li>\n        <li class=\"tui-image-editor-partition only-left-right\">\n            <div></div>\n        </li>\n        <li class=\"tui-image-editor-submenu-align\">\n            <div>\n                <div class=\"tui-image-editor-checkbox\">\n                    <input type=\"checkbox\" id=\"tie-brightness\">\n                    <label for=\"tie-brightness\">Brightness</label>\n                </div>\n                <div class=\"tui-image-editor-range-wrap short\">\n                    <div id=\"tie-brightness-range\"></div>\n                </div>\n            </div>\n            <div>\n                <div class=\"tui-image-editor-checkbox\">\n                    <input type=\"checkbox\" id=\"tie-noise\">\n                    <label for=\"tie-noise\">Noise</label>\n                </div>\n                <div class=\"tui-image-editor-range-wrap short\">\n                    <div id=\"tie-noise-range\"></div>\n                </div>\n            </div>\n\n            <div>\n                <div class=\"tui-image-editor-checkbox\">\n                    <input type=\"checkbox\" id=\"tie-pixelate\">\n                    <label for=\"tie-pixelate\">Pixelate</label>\n                </div>\n                <div class=\"tui-image-editor-range-wrap short\">\n                    <div id=\"tie-pixelate-range\"></div>\n                </div>\n            </div>\n            <div>\n                <div class=\"tui-image-editor-newline tui-image-editor-checkbox-wrap\">\n                    <div class=\"tui-image-editor-checkbox\">\n                        <input type=\"checkbox\" id=\"tie-color-filter\">\n                        <label for=\"tie-color-filter\">Color Filter</label>\n                    </div>\n                </div>\n                <div class=\"tui-image-editor-newline tui-image-editor-range-wrap short\">\n                    <label>Threshold</label>\n                    <div id=\"tie-colorfilter-threshole-range\"></div>\n                </div>\n            </div>\n        </li>\n        <li class=\"tui-image-editor-partition\">\n            <div></div>\n        </li>\n        <li>\n            <div class=\"filter-color-item\">\n                <div id=\"tie-filter-tint-color\" title=\"Tint\"></div>\n                <div class=\"tui-image-editor-checkbox\">\n                    <input type=\"checkbox\" id=\"tie-tint\">\n                    <label for=\"tie-tint\"></label>\n                </div>\n            </div>\n            <div class=\"filter-color-item\">\n                <div id=\"tie-filter-multiply-color\" title=\"Multiply\"></div>\n                <div class=\"tui-image-editor-checkbox\">\n                    <input type=\"checkbox\" id=\"tie-multiply\">\n                    <label for=\"tie-multiply\"></label>\n                </div>\n            </div>\n            <div class=\"filter-color-item\">\n                <div id=\"tie-filter-blend-color\" title=\"Blend\"></div>\n                <div class=\"tui-image-editor-checkbox\">\n                    <input type=\"checkbox\" id=\"tie-blend\">\n                    <label for=\"tie-blend\"></label>\n                </div>\n            </div>\n        </li>\n    </ul>\n";
-	};
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	/**
+	 * Translate messages
+	 */
+	var Locale = function () {
+	    function Locale(locale) {
+	        _classCallCheck(this, Locale);
+
+	        this._locale = locale;
+	    }
+
+	    /**
+	     * localize message
+	     * @param {string} message - message who will be localized
+	     * @returns {string}
+	     */
+
+
+	    _createClass(Locale, [{
+	        key: "localize",
+	        value: function localize(message) {
+	            return this._locale[message] || message;
+	        }
+	    }]);
+
+	    return Locale;
+	}();
+
+	exports.default = Locale;
 
 /***/ }),
-/* 102 */
+/* 103 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -11688,7 +8920,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _util2 = _interopRequireDefault(_util);
 
-	var _imagetracer = __webpack_require__(103);
+	var _imagetracer = __webpack_require__(104);
 
 	var _imagetracer2 = _interopRequireDefault(_imagetracer);
 
@@ -11779,10 +9011,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	                }
 
 	                _this.ui.initializeImgUrl = URL.createObjectURL(file);
-	                _this.loadImageFromFile(file).then(function () {
+	                _this.loadImageFromFile(file).then(function (sizeValue) {
 	                    exitCropOnAction();
 	                    _this.clearUndoStack();
-	                    _this.ui.resizeEditor();
+	                    _this.ui.activeMenuEvent();
+	                    _this.ui.resizeEditor({ imageSize: sizeValue });
 	                })['catch'](function (message) {
 	                    return Promise.reject(message);
 	                });
@@ -12038,6 +9271,32 @@ return /******/ (function(modules) { // webpackBootstrap
 	            cancel: function cancel() {
 	                _this8.stopDrawingMode();
 	                _this8.ui.changeMenu('crop');
+	            },
+	            preset: function preset(presetType) {
+	                switch (presetType) {
+	                    case 'preset-square':
+	                        _this8.setCropzoneRect(1 / 1);
+	                        break;
+	                    case 'preset-3-2':
+	                        _this8.setCropzoneRect(3 / 2);
+	                        break;
+	                    case 'preset-4-3':
+	                        _this8.setCropzoneRect(4 / 3);
+	                        break;
+	                    case 'preset-5-4':
+	                        _this8.setCropzoneRect(5 / 4);
+	                        break;
+	                    case 'preset-7-5':
+	                        _this8.setCropzoneRect(7 / 5);
+	                        break;
+	                    case 'preset-16-9':
+	                        _this8.setCropzoneRect(16 / 9);
+	                        break;
+	                    default:
+	                        _this8.setCropzoneRect();
+	                        _this8.ui.crop.changeApplyButtonStatus(false);
+	                        break;
+	                }
 	            }
 	        }, this._commonAction());
 	    },
@@ -12148,7 +9407,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    position: pos.originPosition,
 	                    styles: {
 	                        fill: _this11.ui.text.textColor,
-	                        fontSize: _util2.default.toInteger(_this11.ui.text.fontSize)
+	                        fontSize: _util2.default.toInteger(_this11.ui.text.fontSize),
+	                        fontFamily: 'Noto Sans'
 	                    }
 	                }).then(function () {
 	                    _this11.changeCursor('default');
@@ -12232,7 +9492,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ }),
-/* 103 */
+/* 104 */
 /***/ (function(module, exports) {
 
 	'use strict';
@@ -13386,7 +10646,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.default = ImageTracer;
 
 /***/ }),
-/* 104 */
+/* 105 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -13405,67 +10665,67 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _promise2 = _interopRequireDefault(_promise);
 
-	var _fabric = __webpack_require__(105);
+	var _fabric = __webpack_require__(106);
 
 	var _fabric2 = _interopRequireDefault(_fabric);
 
-	var _imageLoader = __webpack_require__(106);
+	var _imageLoader = __webpack_require__(107);
 
 	var _imageLoader2 = _interopRequireDefault(_imageLoader);
 
-	var _cropper = __webpack_require__(108);
+	var _cropper = __webpack_require__(109);
 
 	var _cropper2 = _interopRequireDefault(_cropper);
 
-	var _flip = __webpack_require__(110);
+	var _flip = __webpack_require__(111);
 
 	var _flip2 = _interopRequireDefault(_flip);
 
-	var _rotation = __webpack_require__(111);
+	var _rotation = __webpack_require__(112);
 
 	var _rotation2 = _interopRequireDefault(_rotation);
 
-	var _freeDrawing = __webpack_require__(112);
+	var _freeDrawing = __webpack_require__(113);
 
 	var _freeDrawing2 = _interopRequireDefault(_freeDrawing);
 
-	var _line = __webpack_require__(113);
+	var _line = __webpack_require__(114);
 
 	var _line2 = _interopRequireDefault(_line);
 
-	var _text = __webpack_require__(114);
+	var _text = __webpack_require__(115);
 
 	var _text2 = _interopRequireDefault(_text);
 
-	var _icon = __webpack_require__(115);
+	var _icon = __webpack_require__(116);
 
 	var _icon2 = _interopRequireDefault(_icon);
 
-	var _filter = __webpack_require__(116);
+	var _filter = __webpack_require__(117);
 
 	var _filter2 = _interopRequireDefault(_filter);
 
-	var _shape = __webpack_require__(122);
+	var _shape = __webpack_require__(123);
 
 	var _shape2 = _interopRequireDefault(_shape);
 
-	var _cropper3 = __webpack_require__(124);
+	var _cropper3 = __webpack_require__(125);
 
 	var _cropper4 = _interopRequireDefault(_cropper3);
 
-	var _freeDrawing3 = __webpack_require__(126);
+	var _freeDrawing3 = __webpack_require__(127);
 
 	var _freeDrawing4 = _interopRequireDefault(_freeDrawing3);
 
-	var _lineDrawing = __webpack_require__(127);
+	var _lineDrawing = __webpack_require__(128);
 
 	var _lineDrawing2 = _interopRequireDefault(_lineDrawing);
 
-	var _shape3 = __webpack_require__(128);
+	var _shape3 = __webpack_require__(129);
 
 	var _shape4 = _interopRequireDefault(_shape3);
 
-	var _text3 = __webpack_require__(129);
+	var _text3 = __webpack_require__(130);
 
 	var _text4 = _interopRequireDefault(_text3);
 
@@ -13508,7 +10768,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	/**
 	 * Graphics class
 	 * @class
-	 * @param {string|jQuery|HTMLElement} wrapper - Wrapper's element or selector
+	 * @param {string|HTMLElement} wrapper - Wrapper's element or selector
 	 * @param {Object} [option] - Canvas max width & height of css
 	 *  @param {number} option.cssMaxWidth - Canvas css-max-width
 	 *  @param {number} option.cssMaxHeight - Canvas css-max-height
@@ -13922,14 +11182,21 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        /**
 	         * To data url from canvas
-	         * @param {string} type - A DOMString indicating the image format. The default type is image/png.
+	         * @param {Object} options - options for toDataURL
+	         *   @param {String} [options.format=png] The format of the output image. Either "jpeg" or "png"
+	         *   @param {Number} [options.quality=1] Quality level (0..1). Only used for jpeg.
+	         *   @param {Number} [options.multiplier=1] Multiplier to scale by
+	         *   @param {Number} [options.left] Cropping left offset. Introduced in fabric v1.2.14
+	         *   @param {Number} [options.top] Cropping top offset. Introduced in fabric v1.2.14
+	         *   @param {Number} [options.width] Cropping width. Introduced in fabric v1.2.14
+	         *   @param {Number} [options.height] Cropping height. Introduced in fabric v1.2.14
 	         * @returns {string} A DOMString containing the requested data URI.
 	         */
 
 	    }, {
 	        key: 'toDataURL',
-	        value: function toDataURL(type) {
-	            return this._canvas && this._canvas.toDataURL(type);
+	        value: function toDataURL(options) {
+	            return this._canvas && this._canvas.toDataURL(options);
 	        }
 
 	        /**
@@ -14124,6 +11391,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	        key: 'getCropzoneRect',
 	        value: function getCropzoneRect() {
 	            return this.getComponent(components.CROPPER).getCropzoneRect();
+	        }
+
+	        /**
+	         * Get cropped rect
+	         * @param {number} [mode] cropzone rect mode
+	         */
+
+	    }, {
+	        key: 'setCropzoneRect',
+	        value: function setCropzoneRect(mode) {
+	            this.getComponent(components.CROPPER).setCropzoneRect(mode);
 	        }
 
 	        /**
@@ -14377,7 +11655,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        /**
 	         * Set canvas element to fabric.Canvas
-	         * @param {jQuery|Element|string} element - Wrapper or canvas element or selector
+	         * @param {Element|string} element - Wrapper or canvas element or selector
 	         * @private
 	         */
 
@@ -14387,9 +11665,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            var selectedElement = void 0;
 	            var canvasElement = void 0;
 
-	            if (element.jquery) {
-	                selectedElement = element[0];
-	            } else if (element.nodeType) {
+	            if (element.nodeType) {
 	                selectedElement = element;
 	            } else {
 	                selectedElement = document.querySelector(element);
@@ -14773,13 +12049,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = Graphics;
 
 /***/ }),
-/* 105 */
+/* 106 */
 /***/ (function(module, exports) {
 
-	module.exports = __WEBPACK_EXTERNAL_MODULE_105__;
+	module.exports = __WEBPACK_EXTERNAL_MODULE_106__;
 
 /***/ }),
-/* 106 */
+/* 107 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -14790,7 +12066,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _promise2 = _interopRequireDefault(_promise);
 
-	var _component = __webpack_require__(107);
+	var _component = __webpack_require__(108);
 
 	var _component2 = _interopRequireDefault(_component);
 
@@ -14839,7 +12115,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	     * Load image from url
 	     * @param {?string} imageName - File name
 	     * @param {?(fabric.Image|string)} img - fabric.Image instance or URL of an image
-	     * @returns {jQuery.Deferred} deferred
+	     * @returns {Promise}
 	     */
 
 
@@ -14876,7 +12152,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        /**
 	         * Set background image
 	         * @param {?(fabric.Image|String)} img fabric.Image instance or URL of an image to set background to
-	         * @returns {$.Deferred} deferred
+	         * @returns {Promise}
 	         * @private
 	         */
 
@@ -14895,7 +12171,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                canvas.setBackgroundImage(img, function () {
 	                    var oImage = canvas.backgroundImage;
 
-	                    if (oImage.getElement()) {
+	                    if (oImage && oImage.getElement()) {
 	                        resolve(oImage);
 	                    } else {
 	                        reject(rejectMessages.loadingImageFailed);
@@ -14911,7 +12187,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = ImageLoader;
 
 /***/ }),
-/* 107 */
+/* 108 */
 /***/ (function(module, exports) {
 
 	"use strict";
@@ -14951,7 +12227,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  /**
 	   * Fire Graphics event
-	   * @param {Array} args - arguments
 	   * @returns {Object} return value
 	   */
 
@@ -15097,22 +12372,26 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = Component;
 
 /***/ }),
-/* 108 */
+/* 109 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	var _fabric = __webpack_require__(105);
+	var _tuiCodeSnippet = __webpack_require__(3);
+
+	var _tuiCodeSnippet2 = _interopRequireDefault(_tuiCodeSnippet);
+
+	var _fabric = __webpack_require__(106);
 
 	var _fabric2 = _interopRequireDefault(_fabric);
 
-	var _component = __webpack_require__(107);
+	var _component = __webpack_require__(108);
 
 	var _component2 = _interopRequireDefault(_component);
 
-	var _cropzone = __webpack_require__(109);
+	var _cropzone = __webpack_require__(110);
 
 	var _cropzone2 = _interopRequireDefault(_cropzone);
 
@@ -15133,6 +12412,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 	var MOUSE_MOVE_THRESHOLD = 10;
+	var DEFAULT_OPTION = {
+	    top: -10,
+	    left: -10,
+	    height: 1,
+	    width: 1
+	};
 
 	/**
 	 * Cropper components
@@ -15437,6 +12722,81 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 
 	        /**
+	         * Set a cropzone square
+	         * @param {number} [presetRatio] - preset ratio
+	         */
+
+	    }, {
+	        key: 'setCropzoneRect',
+	        value: function setCropzoneRect(presetRatio) {
+	            var canvas = this.getCanvas();
+	            var cropzone = this._cropzone;
+
+	            canvas.deactivateAll();
+	            canvas.selection = false;
+	            cropzone.remove();
+
+	            cropzone.set(presetRatio ? this._getPresetCropSizePosition(presetRatio) : DEFAULT_OPTION);
+
+	            canvas.add(cropzone);
+	            canvas.selection = true;
+
+	            if (presetRatio) {
+	                canvas.setActiveObject(cropzone);
+	            }
+	        }
+
+	        /**
+	         * Set a cropzone square
+	         * @param {number} presetRatio - preset ratio
+	         * @returns {{left: number, top: number, width: number, height: number}}
+	         * @private
+	         */
+
+	    }, {
+	        key: '_getPresetCropSizePosition',
+	        value: function _getPresetCropSizePosition(presetRatio) {
+	            var canvas = this.getCanvas();
+	            var originalWidth = canvas.getWidth();
+	            var originalHeight = canvas.getHeight();
+
+	            var standardSize = originalWidth >= originalHeight ? originalWidth : originalHeight;
+	            var getScale = function getScale(value, orignalValue) {
+	                return value > orignalValue ? orignalValue / value : 1;
+	            };
+
+	            var width = standardSize * presetRatio;
+	            var height = standardSize;
+
+	            var scaleWidth = getScale(width, originalWidth);
+
+	            var _snippet$map = _tuiCodeSnippet2.default.map([width, height], function (sizeValue) {
+	                return sizeValue * scaleWidth;
+	            });
+
+	            width = _snippet$map[0];
+	            height = _snippet$map[1];
+
+
+	            var scaleHeight = getScale(height, originalHeight);
+
+	            var _snippet$map2 = _tuiCodeSnippet2.default.map([width, height], function (sizeValue) {
+	                return sizeValue * scaleHeight;
+	            });
+
+	            width = _snippet$map2[0];
+	            height = _snippet$map2[1];
+
+
+	            return {
+	                top: (originalHeight - height) / 2,
+	                left: (originalWidth - width) / 2,
+	                width: width,
+	                height: height
+	            };
+	        }
+
+	        /**
 	         * Keydown event handler
 	         * @param {KeyboardEvent} e - Event object
 	         * @private
@@ -15471,7 +12831,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = Cropper;
 
 /***/ }),
-/* 109 */
+/* 110 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -15480,7 +12840,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _tuiCodeSnippet2 = _interopRequireDefault(_tuiCodeSnippet);
 
-	var _fabric = __webpack_require__(105);
+	var _fabric = __webpack_require__(106);
 
 	var _fabric2 = _interopRequireDefault(_fabric);
 
@@ -15555,6 +12915,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        if (this.options.lineWidth) {
 	            this._fillInnerRect(ctx);
+	            this._strokeBorder(ctx, 'rgb(255, 255, 255)', {
+	                lineWidth: this.options.lineWidth
+	            });
 	        } else {
 	            // Black dash line
 	            this._strokeBorder(ctx, 'rgb(0, 0, 0)', {
@@ -15933,7 +13296,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = Cropzone;
 
 /***/ }),
-/* 110 */
+/* 111 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -15948,7 +13311,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _promise2 = _interopRequireDefault(_promise);
 
-	var _component = __webpack_require__(107);
+	var _component = __webpack_require__(108);
 
 	var _component2 = _interopRequireDefault(_component);
 
@@ -16008,7 +13371,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        /**
 	         * Set flipX, flipY
 	         * @param {{flipX: Boolean, flipY: Boolean}} newSetting - Flip setting
-	         * @returns {jQuery.Deferred}
+	         * @returns {Promise}
 	         */
 
 	    }, {
@@ -16091,7 +13454,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        /**
 	         * Reset flip settings
-	         * @returns {jQuery.Deferred}
+	         * @returns {Promise}
 	         */
 
 	    }, {
@@ -16105,7 +13468,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        /**
 	         * Flip x
-	         * @returns {jQuery.Deferred}
+	         * @returns {Promise}
 	         */
 
 	    }, {
@@ -16121,7 +13484,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        /**
 	         * Flip y
-	         * @returns {jQuery.Deferred}
+	         * @returns {Promise}
 	         */
 
 	    }, {
@@ -16142,14 +13505,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = Flip;
 
 /***/ }),
-/* 111 */
+/* 112 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	var _fabric = __webpack_require__(105);
+	var _fabric = __webpack_require__(106);
 
 	var _fabric2 = _interopRequireDefault(_fabric);
 
@@ -16157,7 +13520,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _promise2 = _interopRequireDefault(_promise);
 
-	var _component = __webpack_require__(107);
+	var _component = __webpack_require__(108);
 
 	var _component2 = _interopRequireDefault(_component);
 
@@ -16216,7 +13579,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	         *      See "http://fabricjs.com/docs/fabric.Object.html#setAngle"
 	         *
 	         * @param {number} angle - Angle value
-	         * @returns {jQuery.Deferred}
+	         * @returns {Promise}
 	         */
 
 	    }, {
@@ -16271,7 +13634,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        /**
 	         * Rotate the image
 	         * @param {number} additionalAngle - Additional angle
-	         * @returns {jQuery.Deferred}
+	         * @returns {Promise}
 	         */
 
 	    }, {
@@ -16289,18 +13652,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = Rotation;
 
 /***/ }),
-/* 112 */
+/* 113 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	var _fabric = __webpack_require__(105);
+	var _fabric = __webpack_require__(106);
 
 	var _fabric2 = _interopRequireDefault(_fabric);
 
-	var _component = __webpack_require__(107);
+	var _component = __webpack_require__(108);
 
 	var _component2 = _interopRequireDefault(_component);
 
@@ -16402,18 +13765,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = FreeDrawing;
 
 /***/ }),
-/* 113 */
+/* 114 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	var _fabric = __webpack_require__(105);
+	var _fabric = __webpack_require__(106);
 
 	var _fabric2 = _interopRequireDefault(_fabric);
 
-	var _component = __webpack_require__(107);
+	var _component = __webpack_require__(108);
 
 	var _component2 = _interopRequireDefault(_component);
 
@@ -16626,14 +13989,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = Line;
 
 /***/ }),
-/* 114 */
+/* 115 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	var _fabric = __webpack_require__(105);
+	var _fabric = __webpack_require__(106);
 
 	var _fabric2 = _interopRequireDefault(_fabric);
 
@@ -16645,7 +14008,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _promise2 = _interopRequireDefault(_promise);
 
-	var _component = __webpack_require__(107);
+	var _component = __webpack_require__(108);
 
 	var _component2 = _interopRequireDefault(_component);
 
@@ -17412,14 +14775,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = Text;
 
 /***/ }),
-/* 115 */
+/* 116 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	var _fabric = __webpack_require__(105);
+	var _fabric = __webpack_require__(106);
 
 	var _fabric2 = _interopRequireDefault(_fabric);
 
@@ -17431,7 +14794,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _promise2 = _interopRequireDefault(_promise);
 
-	var _component = __webpack_require__(107);
+	var _component = __webpack_require__(108);
 
 	var _component2 = _interopRequireDefault(_component);
 
@@ -17516,44 +14879,58 @@ return /******/ (function(modules) { // webpackBootstrap
 	                var canvas = _this2.getCanvas();
 	                var path = _this2._pathMap[type];
 	                var selectionStyle = _consts2.default.fObjectOptions.SELECTION_STYLE;
+	                var registerdIcon = Object.keys(_consts2.default.defaultIconPath).indexOf(type) >= 0;
+	                var useDragAddIcon = _this2.useDragAddIcon && registerdIcon;
+	                var icon = path ? _this2._createIcon(path) : null;
 
-	                if (!path) {
+	                if (!icon) {
 	                    reject(rejectMessages.invalidParameters);
 	                }
-
-	                var icon = _this2._createIcon(path);
 
 	                icon.set(_tuiCodeSnippet2.default.extend({
 	                    type: 'icon',
 	                    fill: _this2._oColor
 	                }, selectionStyle, options, _this2.graphics.controlStyle));
 
-	                if (_this2.useDragAddIcon) {
-	                    canvas.add(icon).setActiveObject(icon);
-	                    canvas.on({
-	                        'mouse:move': function mouseMove(fEvent) {
-	                            canvas.selection = false;
+	                canvas.add(icon).setActiveObject(icon);
 
-	                            _this2.fire(events.ICON_CREATE_RESIZE, {
-	                                moveOriginPointer: canvas.getPointer(fEvent.e)
-	                            });
-	                        },
-	                        'mouse:up': function mouseUp(fEvent) {
-	                            _this2.fire(events.ICON_CREATE_END, {
-	                                moveOriginPointer: canvas.getPointer(fEvent.e)
-	                            });
-
-	                            canvas.defaultCursor = 'default';
-	                            canvas.off('mouse:up');
-	                            canvas.off('mouse:move');
-	                            canvas.selection = true;
-	                        }
-	                    });
-	                } else {
-	                    canvas.add(icon).setActiveObject(icon);
+	                if (useDragAddIcon) {
+	                    _this2._addWithDragEvent(canvas);
 	                }
 
 	                resolve(_this2.graphics.createObjectProperties(icon));
+	            });
+	        }
+
+	        /**
+	         * Added icon drag event
+	         * @param {fabric.Canvas} canvas - Canvas instance
+	         * @private
+	         */
+
+	    }, {
+	        key: '_addWithDragEvent',
+	        value: function _addWithDragEvent(canvas) {
+	            var _this3 = this;
+
+	            canvas.on({
+	                'mouse:move': function mouseMove(fEvent) {
+	                    canvas.selection = false;
+
+	                    _this3.fire(events.ICON_CREATE_RESIZE, {
+	                        moveOriginPointer: canvas.getPointer(fEvent.e)
+	                    });
+	                },
+	                'mouse:up': function mouseUp(fEvent) {
+	                    _this3.fire(events.ICON_CREATE_END, {
+	                        moveOriginPointer: canvas.getPointer(fEvent.e)
+	                    });
+
+	                    canvas.defaultCursor = 'default';
+	                    canvas.off('mouse:up');
+	                    canvas.off('mouse:move');
+	                    canvas.selection = true;
+	                }
 	            });
 	        }
 
@@ -17565,10 +14942,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'registerPaths',
 	        value: function registerPaths(pathInfos) {
-	            var _this3 = this;
+	            var _this4 = this;
 
 	            _tuiCodeSnippet2.default.forEach(pathInfos, function (path, type) {
-	                _this3._pathMap[type] = path;
+	                _this4._pathMap[type] = path;
 	            }, this);
 	        }
 
@@ -17620,7 +14997,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = Icon;
 
 /***/ }),
-/* 116 */
+/* 117 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -17633,15 +15010,15 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _promise2 = _interopRequireDefault(_promise);
 
-	var _fabric = __webpack_require__(105);
+	var _fabric = __webpack_require__(106);
 
 	var _fabric2 = _interopRequireDefault(_fabric);
 
-	var _component = __webpack_require__(107);
+	var _component = __webpack_require__(108);
 
 	var _component2 = _interopRequireDefault(_component);
 
-	var _mask = __webpack_require__(117);
+	var _mask = __webpack_require__(118);
 
 	var _mask2 = _interopRequireDefault(_mask);
 
@@ -17649,19 +15026,19 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _consts2 = _interopRequireDefault(_consts);
 
-	var _blur = __webpack_require__(118);
+	var _blur = __webpack_require__(119);
 
 	var _blur2 = _interopRequireDefault(_blur);
 
-	var _sharpen = __webpack_require__(119);
+	var _sharpen = __webpack_require__(120);
 
 	var _sharpen2 = _interopRequireDefault(_sharpen);
 
-	var _emboss = __webpack_require__(120);
+	var _emboss = __webpack_require__(121);
 
 	var _emboss2 = _interopRequireDefault(_emboss);
 
-	var _colorFilter = __webpack_require__(121);
+	var _colorFilter = __webpack_require__(122);
 
 	var _colorFilter2 = _interopRequireDefault(_colorFilter);
 
@@ -17942,12 +15319,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = Filter;
 
 /***/ }),
-/* 117 */
+/* 118 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var _fabric = __webpack_require__(105);
+	var _fabric = __webpack_require__(106);
 
 	var _fabric2 = _interopRequireDefault(_fabric);
 
@@ -18053,12 +15430,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = Mask;
 
 /***/ }),
-/* 118 */
+/* 119 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var _fabric = __webpack_require__(105);
+	var _fabric = __webpack_require__(106);
 
 	var _fabric2 = _interopRequireDefault(_fabric);
 
@@ -18095,12 +15472,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = Blur;
 
 /***/ }),
-/* 119 */
+/* 120 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var _fabric = __webpack_require__(105);
+	var _fabric = __webpack_require__(106);
 
 	var _fabric2 = _interopRequireDefault(_fabric);
 
@@ -18137,12 +15514,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = Sharpen;
 
 /***/ }),
-/* 120 */
+/* 121 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var _fabric = __webpack_require__(105);
+	var _fabric = __webpack_require__(106);
 
 	var _fabric2 = _interopRequireDefault(_fabric);
 
@@ -18179,12 +15556,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = Emboss;
 
 /***/ }),
-/* 121 */
+/* 122 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var _fabric = __webpack_require__(105);
+	var _fabric = __webpack_require__(106);
 
 	var _fabric2 = _interopRequireDefault(_fabric);
 
@@ -18297,14 +15674,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = ColorFilter;
 
 /***/ }),
-/* 122 */
+/* 123 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	var _fabric = __webpack_require__(105);
+	var _fabric = __webpack_require__(106);
 
 	var _fabric2 = _interopRequireDefault(_fabric);
 
@@ -18312,7 +15689,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _promise2 = _interopRequireDefault(_promise);
 
-	var _component = __webpack_require__(107);
+	var _component = __webpack_require__(108);
 
 	var _component2 = _interopRequireDefault(_component);
 
@@ -18320,7 +15697,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _consts2 = _interopRequireDefault(_consts);
 
-	var _shapeResizeHelper = __webpack_require__(123);
+	var _shapeResizeHelper = __webpack_require__(124);
 
 	var _shapeResizeHelper2 = _interopRequireDefault(_shapeResizeHelper);
 
@@ -18344,6 +15721,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	var KEY_CODES = _consts2.default.keyCodes;
 
 	var DEFAULT_TYPE = 'rect';
+	var DEFAULT_WIDTH = 20;
+	var DEFAULT_HEIGHT = 20;
+
 	var DEFAULT_OPTIONS = {
 	    strokeWidth: 1,
 	    stroke: '#000000',
@@ -18529,13 +15909,16 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            return new _promise2.default(function (resolve) {
 	                var canvas = _this2.getCanvas();
-	                options = _this2._createOptions(options);
+	                options = _this2._extendOptions(options);
 	                var shapeObj = _this2._createInstance(type, options);
 
 	                _this2._bindEventOnShape(shapeObj);
 
 	                canvas.add(shapeObj).setActiveObject(shapeObj);
-	                resolve(_this2.graphics.createObjectProperties(shapeObj));
+
+	                var objectProperties = _this2.graphics.createObjectProperties(shapeObj);
+
+	                resolve(objectProperties);
 	            });
 	        }
 
@@ -18611,8 +15994,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	         */
 
 	    }, {
-	        key: '_createOptions',
-	        value: function _createOptions(options) {
+	        key: '_extendOptions',
+	        value: function _extendOptions(options) {
 	            var selectionStyles = _consts2.default.fObjectOptions.SELECTION_STYLE;
 
 	            options = (0, _tuiCodeSnippet.extend)({}, DEFAULT_OPTIONS, this._options, selectionStyles, options);
@@ -18740,14 +16123,26 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: '_onFabricMouseUp',
 	        value: function _onFabricMouseUp() {
+	            var _this5 = this;
+
 	            var canvas = this.getCanvas();
+	            var startPointX = this._startPoint.x;
+	            var startPointY = this._startPoint.y;
 	            var shape = this._shapeObj;
 
-	            if (shape) {
+	            if (!shape) {
+	                this.add(this._type, {
+	                    left: startPointX,
+	                    top: startPointY,
+	                    width: DEFAULT_WIDTH,
+	                    height: DEFAULT_HEIGHT
+	                }).then(function (objectProps) {
+	                    _this5.fire(eventNames.ADD_OBJECT, objectProps);
+	                });
+	            } else if (shape) {
 	                _shapeResizeHelper2.default.adjustOriginToCenter(shape);
+	                this.fire(eventNames.ADD_OBJECT_AFTER, this.graphics.createObjectProperties(shape));
 	            }
-
-	            this.fire(eventNames.ADD_OBJECT_AFTER, this.graphics.createObjectProperties(shape));
 
 	            canvas.off({
 	                'mouse:move': this._handlers.mousemove,
@@ -18798,7 +16193,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = Shape;
 
 /***/ }),
-/* 123 */
+/* 124 */
 /***/ (function(module, exports) {
 
 	'use strict';
@@ -19059,14 +16454,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ }),
-/* 124 */
+/* 125 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	var _drawingMode = __webpack_require__(125);
+	var _drawingMode = __webpack_require__(126);
 
 	var _drawingMode2 = _interopRequireDefault(_drawingMode);
 
@@ -19139,7 +16534,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = CropperDrawingMode;
 
 /***/ }),
-/* 125 */
+/* 126 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -19221,14 +16616,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = DrawingMode;
 
 /***/ }),
-/* 126 */
+/* 127 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	var _drawingMode = __webpack_require__(125);
+	var _drawingMode = __webpack_require__(126);
 
 	var _drawingMode2 = _interopRequireDefault(_drawingMode);
 
@@ -19302,14 +16697,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = FreeDrawingMode;
 
 /***/ }),
-/* 127 */
+/* 128 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	var _drawingMode = __webpack_require__(125);
+	var _drawingMode = __webpack_require__(126);
 
 	var _drawingMode2 = _interopRequireDefault(_drawingMode);
 
@@ -19383,14 +16778,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = LineDrawingMode;
 
 /***/ }),
-/* 128 */
+/* 129 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	var _drawingMode = __webpack_require__(125);
+	var _drawingMode = __webpack_require__(126);
 
 	var _drawingMode2 = _interopRequireDefault(_drawingMode);
 
@@ -19463,14 +16858,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = ShapeDrawingMode;
 
 /***/ }),
-/* 129 */
+/* 130 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	var _drawingMode = __webpack_require__(125);
+	var _drawingMode = __webpack_require__(126);
 
 	var _drawingMode2 = _interopRequireDefault(_drawingMode);
 
@@ -19543,14 +16938,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = TextDrawingMode;
 
 /***/ }),
-/* 130 */
+/* 131 */
 /***/ (function(module, exports) {
 
 	// removed by extract-text-webpack-plugin
 
 /***/ }),
-/* 131 */,
-/* 132 */
+/* 132 */,
+/* 133 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -19619,7 +17014,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = command;
 
 /***/ }),
-/* 133 */
+/* 134 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -19678,7 +17073,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = command;
 
 /***/ }),
-/* 134 */
+/* 135 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -19745,7 +17140,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = command;
 
 /***/ }),
-/* 135 */
+/* 136 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -19821,7 +17216,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = command;
 
 /***/ }),
-/* 136 */
+/* 137 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -19896,7 +17291,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = command;
 
 /***/ }),
-/* 137 */
+/* 138 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -19988,7 +17383,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = command;
 
 /***/ }),
-/* 138 */
+/* 139 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -20067,7 +17462,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = command;
 
 /***/ }),
-/* 139 */
+/* 140 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -20159,7 +17554,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = command;
 
 /***/ }),
-/* 140 */
+/* 141 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -20232,7 +17627,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = command;
 
 /***/ }),
-/* 141 */
+/* 142 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -20321,7 +17716,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = command;
 
 /***/ }),
-/* 142 */
+/* 143 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -20379,7 +17774,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = command;
 
 /***/ }),
-/* 143 */
+/* 144 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -20436,7 +17831,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = command;
 
 /***/ }),
-/* 144 */
+/* 145 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -20475,11 +17870,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var prevImage = loader.getCanvasImage();
 	        var prevImageWidth = prevImage ? prevImage.width : 0;
 	        var prevImageHeight = prevImage ? prevImage.height : 0;
+	        var objects = graphics.removeAll(true).filter(function (objectItem) {
+	            return objectItem.type !== 'cropzone';
+	        });
+
+	        objects.forEach(function (objectItem) {
+	            objectItem.evented = true;
+	        });
 
 	        this.undoData = {
 	            name: loader.getImageName(),
 	            image: prevImage,
-	            objects: graphics.removeAll(true)
+	            objects: objects
 	        };
 
 	        return loader.load(imageName, imgUrl).then(function (newImage) {
@@ -20491,6 +17893,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            };
 	        });
 	    },
+
 
 	    /**
 	     * @param {Graphics} graphics - Graphics instance
@@ -20516,7 +17919,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = command;
 
 /***/ }),
-/* 145 */
+/* 146 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -20576,7 +17979,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = command;
 
 /***/ }),
-/* 146 */
+/* 147 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -20639,7 +18042,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = command;
 
 /***/ }),
-/* 147 */
+/* 148 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -20704,7 +18107,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = command;
 
 /***/ }),
-/* 148 */
+/* 149 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -20764,7 +18167,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = command;
 
 /***/ }),
-/* 149 */
+/* 150 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -20851,7 +18254,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = command;
 
 /***/ }),
-/* 150 */
+/* 151 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';

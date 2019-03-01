@@ -6,6 +6,8 @@
 import snippet from 'tui-code-snippet';
 import Promise from 'core-js/library/es6/promise';
 import ImageEditor from '../src/js/imageEditor';
+import util from '../src/js/util';
+import consts from '../src/js/consts';
 
 describe('ImageEditor', () => {
     // hostnameSent module scope variable can not be reset.
@@ -15,7 +17,7 @@ describe('ImageEditor', () => {
 
         beforeEach(() => {
             el = document.createElement('div');
-            spyOn(snippet, 'imagePing');
+            spyOn(snippet, 'sendHostname');
 
             imageEditor = new ImageEditor(el, {
                 usageStatistics: false
@@ -29,7 +31,7 @@ describe('ImageEditor', () => {
         xit('should send hostname by default', () => {
             imageEditor = new ImageEditor(el);
 
-            expect(snippet.imagePing).toHaveBeenCalled();
+            expect(snippet.sendHostname).toHaveBeenCalled();
         });
 
         xit('should not send hostname on usageStatistics option false', () => {
@@ -37,7 +39,7 @@ describe('ImageEditor', () => {
                 usageStatistics: false
             });
 
-            expect(snippet.imagePing).not.toHaveBeenCalled();
+            expect(snippet.sendHostname).not.toHaveBeenCalled();
         });
 
         it('removeObjectStream () must be executed as many times as the length of the Object array.', done => {
@@ -56,6 +58,20 @@ describe('ImageEditor', () => {
                 expect(imageEditor._removeObjectStream.calls.count()).toBe(expected);
                 done();
             });
+        });
+
+        it('`preventDefault` of BACKSPACE key events should not be executed when object is selected state.', () => {
+            const spyCallback = jasmine.createSpy();
+
+            spyOn(imageEditor._graphics, 'getActiveObject').and.returnValue(null);
+            spyOn(imageEditor._graphics, 'getActiveGroupObject').and.returnValue(null);
+
+            imageEditor._onKeyDown({
+                keyCode: consts.keyCodes.BACKSPACE,
+                preventDefault: spyCallback
+            });
+
+            expect(spyCallback).not.toHaveBeenCalled();
         });
 
         describe('removeActiveObject()', () => {

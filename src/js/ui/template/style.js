@@ -11,6 +11,9 @@ export default ({
     submenuColorpickerButton,
     submenuRangeBar,
     submenuRangeSubbar,
+    submenuDisabledRangePointer,
+    submenuDisabledRangeBar,
+    submenuDisabledRangeSubbar,
     submenuIconSize,
     menuIconSize,
     biSize
@@ -20,6 +23,7 @@ export default ({
     #tie-icon-add-button.icon-location .tui-image-editor-button[data-icontype="icon-location"] label,
     #tie-icon-add-button.icon-polygon .tui-image-editor-button[data-icontype="icon-polygon"] label,
     #tie-icon-add-button.icon-star .tui-image-editor-button[data-icontype="icon-star"] label,
+    #tie-icon-add-button.icon-star-2 .tui-image-editor-button[data-icontype="icon-star-2"] label,
     #tie-icon-add-button.icon-arrow-3 .tui-image-editor-button[data-icontype="icon-arrow-3"] label,
     #tie-icon-add-button.icon-arrow-2 .tui-image-editor-button[data-icontype="icon-arrow-2"] label,
     #tie-icon-add-button.icon-arrow .tui-image-editor-button[data-icontype="icon-arrow"] label,
@@ -30,6 +34,7 @@ export default ({
     #tie-flip-button.flipY .tui-image-editor-button.flipY label,
     #tie-flip-button.resetFlip .tui-image-editor-button.resetFlip label,
     #tie-crop-button .tui-image-editor-button.apply.active label,
+    #tie-crop-preset-button .tui-image-editor-button.preset.active label,
     #tie-shape-button.rect .tui-image-editor-button.rect label,
     #tie-shape-button.circle .tui-image-editor-button.circle label,
     #tie-shape-button.triangle .tui-image-editor-button.triangle label,
@@ -59,6 +64,9 @@ export default ({
     .tui-image-editor-container .tui-image-editor-checkbox input + label:before {
         ${submenuCheckbox}
     }
+    .tui-image-editor-container .tui-image-editor-checkbox input:checked + label:before {
+        border: 0;
+    }
     .tui-image-editor-container .tui-image-editor-virtual-range-pointer {
         ${submenuRangePointer}
     }
@@ -67,6 +75,15 @@ export default ({
     }
     .tui-image-editor-container .tui-image-editor-virtual-range-subbar {
         ${submenuRangeSubbar}
+    }
+    .tui-image-editor-container .tui-image-editor-disabled .tui-image-editor-virtual-range-pointer {
+        ${submenuDisabledRangePointer}
+    }
+    .tui-image-editor-container .tui-image-editor-disabled .tui-image-editor-virtual-range-subbar {
+        ${submenuDisabledRangeSubbar}
+    }
+    .tui-image-editor-container .tui-image-editor-disabled .tui-image-editor-virtual-range-bar {
+        ${submenuDisabledRangeBar}
     }
     .tui-image-editor-container .tui-image-editor-range-value {
         ${submenuRangeValue}
