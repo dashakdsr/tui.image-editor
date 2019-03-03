@@ -513,6 +513,7 @@ class Graphics {
     /**
      * Add image object on canvas
      * @param {string} imgUrl - Image url to make object
+     * @param {Object} obj - obj to make image
      * @returns {Promise}
      */
     addImageObject(imgUrl, obj = {}) {
@@ -522,9 +523,9 @@ class Graphics {
             fabric.Image.fromURL(imgUrl, image => {
                 if (obj.isCircle === true) {
                     image.set({
-                        clipTo: function (ctx) {
+                        clipTo: function(ctx) {
                             ctx.arc(0, 0, obj.radius, 0, Math.PI * 2, true);
-                          }
+                        }
                     });
                 }
                 callback(image);
@@ -1016,10 +1017,10 @@ class Graphics {
      * @param {boolean} selectable - expect status
      */
     changeSelectableAll(selectable) {
-        let that = this
+        const self = this;
         this._canvas.forEachObject(obj => {
-            if (that.specifiedClass && that.specifiedClass.__fe_id === obj.__fe_id) {
-                obj.selectable = false
+            if (self.specifiedClass && self.specifiedClass.__fe_id === obj.__fe_id) {
+                obj.selectable = false;
             } else {
                 obj.selectable = selectable;
             }

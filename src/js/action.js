@@ -1,6 +1,6 @@
 import {extend} from 'tui-code-snippet';
 import util from './util';
-import Imagetracer from './helper/imagetracer';
+// import Imagetracer from './helper/imagetracer';
 
 export default {
 
@@ -95,7 +95,7 @@ export default {
             download: () => {
                 const dataURL = this.toDataURL();
                 let imageName = this.getImageName();
-                let blob, type, w;
+                let blob, type;
 
                 if (util.isSupportFileApi() && window.saveAs) {
                     blob = util.base64ToBlob(dataURL);
@@ -111,17 +111,16 @@ export default {
                 // }
             },
             base64ToBlob: function base64ToBlob() {
-                var dataURL = this.toDataURL();
-                var imageName = this.getImageName();
-                var blob = 0,
-                    type = 0,
-                    w = 0;
-                    blob = util.base64ToBlob(dataURL);
-                    type = blob.type.split('/')[1];
-                    if (imageName.split('.').pop() !== type) {
-                        imageName += '.' + type;
-                    }
-                return blob
+                const dataURL = this.toDataURL();
+                const blob = util.base64ToBlob(dataURL);
+                let imageName = this.getImageName();
+                let type = 0;
+                type = blob.type.split('/')[1];
+                if (imageName.split('.').pop() !== type) {
+                    imageName += `.${type}`;
+                }
+
+                return blob;
             }
         }, this._commonAction());
     },
@@ -196,8 +195,8 @@ export default {
                 iconObj[type] = path;
                 this.registerIcons(iconObj);
             },
-            registCustomIcon: (imgUrl, file) => {
-                const imagetracer = new Imagetracer();
+            registCustomIcon: () => { // imgUrl, file
+                // const imagetracer = new Imagetracer();
                 // imagetracer.imageToSVG(
                 //     imgUrl,
                 //     svgstr => {
@@ -269,7 +268,7 @@ export default {
         return extend({
             changeTextStyle: styleObj => {
                 if (this._graphics._canvas._activeGroup) {
-                    let activeGroup = this._graphics._canvas._activeGroup._objects.map(item => item.__fe_id)
+                    const activeGroup = this._graphics._canvas._activeGroup._objects.map(item => item.__fe_id);
                     this.changeTextStyle(activeGroup, styleObj);
                 } else if (this.activeObjectId) {
                     this.changeTextStyle(this.activeObjectId, styleObj);

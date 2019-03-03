@@ -15,6 +15,7 @@ const command = {
      * Add an image object
      * @param {Graphics} graphics - Graphics instance
      * @param {string} imgUrl - Image url to make object
+     * @param {Object} obj - obj to make image
      * @returns {Promise}
      */
     execute(graphics, imgUrl, obj) {

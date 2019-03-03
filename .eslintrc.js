@@ -17,6 +17,8 @@ module.exports = {
         "sourceType": "module"
     },
     'rules': {
+        'prefer-arrow-callback': [ "error", { "allowNamedFunctions": true } ],
+        'object-shorthand': ["error", "properties"],
         'prefer-destructuring': ['error', {
             VariableDeclarator: {array: true, object: true},
             AssignmentExpression: {array: false, object: false}

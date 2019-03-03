@@ -568,7 +568,7 @@ class ImageEditor {
     /**
      * Load image from url
      * @param {string} url - File url
-     * @param {string} imageName - imageName
+     * @param {string} imageName - imageName.
      * @returns {Promise<SizeChange, ErrorMsg>}
      * @example
      * imageEditor.loadImageFromURL('http://url/testImage.png', 'lena').then(result => {
@@ -587,6 +587,7 @@ class ImageEditor {
     /**
      * Add image object on canvas
      * @param {string} imgUrl - Image url to make object
+     * @param {Object} obj - object to make img
      * @returns {Promise<ObjectProps, ErrorMsg>}
      * @example
      * imageEditor.addImageObject('path/fileName.jpg').then(objectProps => {
@@ -640,7 +641,7 @@ class ImageEditor {
      */
     crop(rect) {
         const data = this._graphics.getCroppedImageData(rect);
-        data.imageName = data === null || data.imageName.length === 0 ? 'sample--name' : data.imageName
+        data.imageName = data === null || data.imageName.length === 0 ? 'sample--name' : data.imageName;
         if (!data) {
             return Promise.reject(rejectMessages.invalidParameters);
         }
