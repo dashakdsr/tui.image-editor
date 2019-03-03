@@ -86,7 +86,7 @@ export default {
                 this.ui.initializeImgUrl = URL.createObjectURL(file);
                 this.loadImageFromFile(file).then(() => {
                     exitCropOnAction();
-                    this.clearUndoStack();
+                    // this.clearUndoStack();
                     this.ui.resizeEditor();
                 })['catch'](message => (
                     Promise.reject(message)
@@ -104,10 +104,24 @@ export default {
                         imageName += `.${type}`;
                     }
                     saveAs(blob, imageName); // eslint-disable-line
-                } else {
-                    w = window.open();
-                    w.document.body.innerHTML = `<img src='${dataURL}'>`;
                 }
+                // else {
+                //     w = window.open();
+                //     w.document.body.innerHTML = `<img src='${dataURL}'>`;
+                // }
+            },
+            base64ToBlob: function base64ToBlob() {
+                var dataURL = this.toDataURL();
+                var imageName = this.getImageName();
+                var blob = 0,
+                    type = 0,
+                    w = 0;
+                    blob = util.base64ToBlob(dataURL);
+                    type = blob.type.split('/')[1];
+                    if (imageName.split('.').pop() !== type) {
+                        imageName += '.' + type;
+                    }
+                return blob
             }
         }, this._commonAction());
     },
@@ -184,19 +198,19 @@ export default {
             },
             registCustomIcon: (imgUrl, file) => {
                 const imagetracer = new Imagetracer();
-                imagetracer.imageToSVG(
-                    imgUrl,
-                    svgstr => {
-                        const [, svgPath] = svgstr.match(/path[^>]*d="([^"]*)"/);
-                        const iconObj = {};
-                        iconObj[file.name] = svgPath;
-                        this.registerIcons(iconObj);
-                        this.addIcon(file.name, {
-                            left: 100,
-                            top: 100
-                        });
-                    }, Imagetracer.tracerDefaultOption()
-                );
+                // imagetracer.imageToSVG(
+                //     imgUrl,
+                //     svgstr => {
+                //         const [, svgPath] = svgstr.match(/path[^>]*d="([^"]*)"/);
+                //         const iconObj = {};
+                //         iconObj[file.name] = svgPath;
+                //         this.registerIcons(iconObj);
+                //         this.addIcon(file.name, {
+                //             left: 100,
+                //             top: 100
+                //         });
+                //     }, Imagetracer.tracerDefaultOption()
+                // );
             }
         }, this._commonAction());
     },
@@ -254,7 +268,10 @@ export default {
     _textAction() {
         return extend({
             changeTextStyle: styleObj => {
-                if (this.activeObjectId) {
+                if (this._graphics._canvas._activeGroup) {
+                    let activeGroup = this._graphics._canvas._activeGroup._objects.map(item => item.__fe_id)
+                    this.changeTextStyle(activeGroup, styleObj);
+                } else if (this.activeObjectId) {
                     this.changeTextStyle(this.activeObjectId, styleObj);
                 }
             }

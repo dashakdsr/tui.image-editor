@@ -132,7 +132,7 @@ class Text extends Component {
     start() {
         const canvas = this.getCanvas();
 
-        canvas.selection = false;
+        // canvas.selection = false;
         canvas.defaultCursor = 'text';
         canvas.on({
             'mouse:down': this._listeners.mousedown,
@@ -146,8 +146,8 @@ class Text extends Component {
             canvas.forEachObject(obj => {
                 if (obj.type === 'i-text') {
                     obj.set({
-                        left: obj.left - (obj.width / 2),
-                        top: obj.top - (obj.height / 2),
+                        left: obj.left, // old obj.left - obj.width / 2
+                        top: obj.top, // old obj.top - (obj.height / 2)
                         originX: 'left',
                         originY: 'top'
                     });
@@ -498,11 +498,13 @@ class Text extends Component {
      */
     _onFabricScaling(fEvent) {
         const obj = fEvent.target;
-        const scalingSize = obj.getFontSize() * obj.getScaleY();
+        if (obj.type !== 'image') {
+            const scalingSize = obj.getFontSize() * obj.getScaleY();
+            obj.setFontSize(scalingSize);
 
-        obj.setFontSize(scalingSize);
-        obj.setScaleX(1);
-        obj.setScaleY(1);
+            obj.setScaleX(1);
+            obj.setScaleY(1);
+        }
     }
 
     /**
@@ -542,6 +544,7 @@ class Text extends Component {
      * @private
      */
     _onFabricMouseDown(fEvent) {
+        // var newClickTime = new Date().getTime();
         const obj = fEvent.target;
 
         if (obj && !obj.isType('text')) {
@@ -553,6 +556,10 @@ class Text extends Component {
 
             return;
         }
+        // if (this._isDoubleClick(newClickTime)) {
+        //     this._fireAddText(fEvent);
+        // }
+        // this._lastClickTime = newClickTime;
 
         this._fireAddText(fEvent);
     }

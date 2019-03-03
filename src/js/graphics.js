@@ -355,7 +355,7 @@ class Graphics {
      * @returns {boolean} true if success or false
      */
     startDrawingMode(mode, option) {
-        if (this._isSameDrawingMode(mode)) {
+        if (this._isSameDrawingMode(mode)) { // || mode === 'TEXT'
             return true;
         }
 
@@ -515,11 +515,18 @@ class Graphics {
      * @param {string} imgUrl - Image url to make object
      * @returns {Promise}
      */
-    addImageObject(imgUrl) {
+    addImageObject(imgUrl, obj = {}) {
         const callback = this._callbackAfterLoadingImageObject.bind(this);
 
         return new Promise(resolve => {
             fabric.Image.fromURL(imgUrl, image => {
+                if (obj.isCircle === true) {
+                    image.set({
+                        clipTo: function (ctx) {
+                            ctx.arc(0, 0, obj.radius, 0, Math.PI * 2, true);
+                          }
+                    });
+                }
                 callback(image);
                 resolve(this.createObjectProperties(image));
             }, {
@@ -774,6 +781,7 @@ class Graphics {
         }
 
         this._canvas = new fabric.Canvas(canvasElement, {
+            backgroundColor: '#000000',
             containerClass: 'tui-image-editor-canvas-container',
             enableRetinaScaling: false
         });
@@ -1008,8 +1016,13 @@ class Graphics {
      * @param {boolean} selectable - expect status
      */
     changeSelectableAll(selectable) {
+        let that = this
         this._canvas.forEachObject(obj => {
-            obj.selectable = selectable;
+            if (that.specifiedClass && that.specifiedClass.__fe_id === obj.__fe_id) {
+                obj.selectable = false
+            } else {
+                obj.selectable = selectable;
+            }
             obj.hoverCursor = selectable ? 'move' : 'crosshair';
         });
     }

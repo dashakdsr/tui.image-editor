@@ -5,6 +5,7 @@
 import commandFactory from '../factory/command';
 import Promise from 'core-js/library/es6/promise';
 import consts from '../consts';
+import snippet from 'tui-code-snippet';
 
 const {componentNames, rejectMessages, commandNames} = consts;
 const {TEXT} = componentNames;
@@ -19,18 +20,37 @@ const command = {
      * @param {string} text - Changing text
      * @returns {Promise}
      */
-    execute(graphics, id, text) {
+    execute(graphics, id, styles) {
         const textComp = graphics.getComponent(TEXT);
-        const targetObj = graphics.getObject(id);
-
-        if (!targetObj) {
-            return Promise.reject(rejectMessages.noObject);
+        if (id.length) {
+            for (var i = 0; i < id.length; i++) {
+                const targetObj = graphics.getObject(id[i]);
+                if (!targetObj) {
+                    return Promise.reject(rejectMessages.noObject);
+                }
+                this.undoData.object = targetObj;
+                this.undoData.styles = {};
+                snippet.forEachOwnProperties(styles, function (value, key) {
+                    this.undoData.styles[key] = targetObj[key];
+                });
+                if (i === id.length - 1) {
+                    return textComp.setStyle(targetObj, styles);
+                } else {
+                    textComp.setStyle(targetObj, styles);
+                }
+            }
+        } else {
+            const targetObj = graphics.getObject(id);
+            if (!targetObj) {
+                return Promise.reject(rejectMessages.noObject);
+            }
+            this.undoData.object = targetObj;
+            this.undoData.styles = {};
+            snippet.forEachOwnProperties(styles, function (value, key) {
+                this.undoData.styles[key] = targetObj[key];
+            });
+            return textComp.setStyle(targetObj, styles);
         }
-
-        this.undoData.object = targetObj;
-        this.undoData.text = textComp.getText(targetObj);
-
-        return textComp.change(targetObj, text);
     },
     /**
      * @param {Graphics} graphics - Graphics instance

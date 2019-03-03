@@ -77,7 +77,7 @@ class Icon extends Component {
                 canvas.add(icon).setActiveObject(icon);
                 canvas.on({
                     'mouse:move': fEvent => {
-                        canvas.selection = false;
+                        // canvas.selection = false;
 
                         this.fire(events.ICON_CREATE_RESIZE, {
                             moveOriginPointer: canvas.getPointer(fEvent.e)

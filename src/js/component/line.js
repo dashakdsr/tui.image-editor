@@ -53,7 +53,7 @@ class Line extends Component {
         const canvas = this.getCanvas();
 
         canvas.defaultCursor = 'crosshair';
-        canvas.selection = false;
+        // canvas.selection = false;
 
         this.setBrush(setting);
 

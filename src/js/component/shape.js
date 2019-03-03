@@ -107,7 +107,7 @@ class Shape extends Component {
         this._isSelected = false;
 
         canvas.defaultCursor = 'crosshair';
-        canvas.selection = false;
+        // canvas.selection = false;
         canvas.uniScaleTransform = true;
         canvas.on({
             'mouse:down': this._handlers.mousedown

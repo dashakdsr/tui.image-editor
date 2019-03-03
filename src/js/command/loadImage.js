@@ -26,9 +26,9 @@ const command = {
 
         this.undoData = {
             name: loader.getImageName(),
-            image: prevImage,
-            objects: graphics.removeAll(true)
-        };
+            image: prevImage
+	        // objects: graphics.removeAll(false) // need to be false for our purpose
+            };
 
         return loader.load(imageName, imgUrl).then(newImage => ({
             oldWidth: prevImageWidth,

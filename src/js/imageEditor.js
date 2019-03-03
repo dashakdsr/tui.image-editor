@@ -593,12 +593,12 @@ class ImageEditor {
      *     console.log(ojectProps.id);
      * });
      */
-    addImageObject(imgUrl) {
+    addImageObject(imgUrl, obj) {
         if (!imgUrl) {
             return Promise.reject(rejectMessages.invalidParameters);
         }
 
-        return this.execute(commands.ADD_IMAGE_OBJECT, imgUrl);
+        return this.execute(commands.ADD_IMAGE_OBJECT, imgUrl, obj);
     }
 
     /**
@@ -640,6 +640,7 @@ class ImageEditor {
      */
     crop(rect) {
         const data = this._graphics.getCroppedImageData(rect);
+        data.imageName = data === null || data.imageName.length === 0 ? 'sample--name' : data.imageName
         if (!data) {
             return Promise.reject(rejectMessages.invalidParameters);
         }

@@ -137,7 +137,7 @@ class Cropper extends Component {
             return;
         }
 
-        canvas.selection = false;
+        // canvas.selection = false;
         const coord = canvas.getPointer(fEvent.e);
 
         this._startX = coord.x;

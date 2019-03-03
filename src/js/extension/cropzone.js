@@ -149,7 +149,7 @@ const Cropzone = fabric.util.createClass(fabric.Rect, /** @lends Cropzone.protot
         const y = this._caculateInnerPosition(outerY, (outerY[2] - outerY[1]) / 3);
 
         ctx.save();
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)'; // old 0.1
         ctx.lineWidth = this.options.lineWidth;
         ctx.beginPath();
 
