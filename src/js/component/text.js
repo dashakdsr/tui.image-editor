@@ -498,7 +498,7 @@ class Text extends Component {
      */
     _onFabricScaling(fEvent) {
         const obj = fEvent.target;
-        if (obj.type !== 'image') {
+        if (obj.type !== 'image' || obj.type !== 'group') {
             const scalingSize = obj.getFontSize() * obj.getScaleY();
             obj.setFontSize(scalingSize);
 
