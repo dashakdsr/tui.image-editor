@@ -16112,7 +16112,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        key: '_onFabricScaling',
 	        value: function _onFabricScaling(fEvent) {
 	            var obj = fEvent.target;
-	            if (obj.type !== 'image' || obj.type !== 'group') {
+	            if (obj.type !== 'image' && obj.type !== 'group') {
 	                var scalingSize = obj.getFontSize() * obj.getScaleY();
 	                obj.setFontSize(scalingSize);
 
