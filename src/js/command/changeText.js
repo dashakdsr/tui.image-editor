@@ -20,39 +20,18 @@ const command = {
      * @param {string} styles - Changing text
      * @returns {Promise}
      */
-    execute(graphics, id, styles) {
+    execute(graphics, id, text) {
         const textComp = graphics.getComponent(TEXT);
-        if (id.length) {
-            for (let i = 0; i < id.length; i += 1) {
-                const targetObj = graphics.getObject(id[i]);
-                if (!targetObj) {
-                    return Promise.reject(rejectMessages.noObject);
-                }
-                this.undoData.object = targetObj;
-                this.undoData.styles = {};
-                snippet.forEachOwnProperties(styles, function(value, key) {
-                    this.undoData.styles[key] = targetObj[key];
-                });
-                if (i === id.length - 1) {
-                    return textComp.setStyle(targetObj, styles);
-                }
-                textComp.setStyle(targetObj, styles);
-            }
-        } else {
-            const targetObj = graphics.getObject(id);
-            if (!targetObj) {
-                return Promise.reject(rejectMessages.noObject);
-            }
-            this.undoData.object = targetObj;
-            this.undoData.styles = {};
-            snippet.forEachOwnProperties(styles, function(value, key) {
-                this.undoData.styles[key] = targetObj[key];
-            });
+        const targetObj = graphics.getObject(id);
 
-            return textComp.setStyle(targetObj, styles);
+        if (!targetObj) {
+            return Promise.reject(rejectMessages.noObject);
         }
 
-        return new Promise();
+        this.undoData.object = targetObj;
+        this.undoData.text = textComp.getText(targetObj);
+
+        return textComp.change(targetObj, text);
     },
     /**
      * @param {Graphics} graphics - Graphics instance
