@@ -19053,12 +19053,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	'use strict';
 
-	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; /**
-	                                                                                                                                                                                                                                                                               * @author NHN Ent. FE Development Team <dl_javascript@nhnent.com>
-	                                                                                                                                                                                                                                                                               * @fileoverview Change a text
-	                                                                                                                                                                                                                                                                               */
-
-
 	var _command = __webpack_require__(69);
 
 	var _command2 = _interopRequireDefault(_command);
@@ -19071,15 +19065,15 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _consts2 = _interopRequireDefault(_consts);
 
-	var _tuiCodeSnippet = __webpack_require__(3);
-
-	var _tuiCodeSnippet2 = _interopRequireDefault(_tuiCodeSnippet);
-
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	var componentNames = _consts2.default.componentNames,
 	    rejectMessages = _consts2.default.rejectMessages,
-	    commandNames = _consts2.default.commandNames;
+	    commandNames = _consts2.default.commandNames; /**
+	                                                   * @author NHN Ent. FE Development Team <dl_javascript@nhnent.com>
+	                                                   * @fileoverview Change a text
+	                                                   */
+
 	var TEXT = componentNames.TEXT;
 
 
@@ -19090,54 +19084,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	     * Change a text
 	     * @param {Graphics} graphics - Graphics instance
 	     * @param {number} id - object id
-	     * @param {string} styles - Changing text
+	     * @param {string} text - Changing text
 	     * @returns {Promise}
 	     */
-	    execute: function execute(graphics, id, styles) {
-	        var _this = this;
-
+	    execute: function execute(graphics, id, text) {
 	        var textComp = graphics.getComponent(TEXT);
-	        if (id.length) {
-	            var _loop = function _loop(i) {
-	                var targetObj = graphics.getObject(id[i]);
-	                if (!targetObj) {
-	                    return {
-	                        v: _promise2.default.reject(rejectMessages.noObject)
-	                    };
-	                }
-	                _this.undoData.object = targetObj;
-	                _this.undoData.styles = {};
-	                _tuiCodeSnippet2.default.forEachOwnProperties(styles, function (value, key) {
-	                    this.undoData.styles[key] = targetObj[key];
-	                });
-	                if (i === id.length - 1) {
-	                    return {
-	                        v: textComp.setStyle(targetObj, styles)
-	                    };
-	                }
-	                textComp.setStyle(targetObj, styles);
-	            };
+	        var targetObj = graphics.getObject(id);
 
-	            for (var i = 0; i < id.length; i += 1) {
-	                var _ret = _loop(i);
-
-	                if ((typeof _ret === 'undefined' ? 'undefined' : _typeof(_ret)) === "object") return _ret.v;
-	            }
-	        } else {
-	            var _targetObj = graphics.getObject(id);
-	            if (!_targetObj) {
-	                return _promise2.default.reject(rejectMessages.noObject);
-	            }
-	            this.undoData.object = _targetObj;
-	            this.undoData.styles = {};
-	            _tuiCodeSnippet2.default.forEachOwnProperties(styles, function (value, key) {
-	                this.undoData.styles[key] = _targetObj[key];
-	            });
-
-	            return textComp.setStyle(_targetObj, styles);
+	        if (!targetObj) {
+	            return _promise2.default.reject(rejectMessages.noObject);
 	        }
 
-	        return new _promise2.default();
+	        this.undoData.object = targetObj;
+	        this.undoData.text = textComp.getText(targetObj);
+
+	        return textComp.change(targetObj, text);
 	    },
 
 	    /**
