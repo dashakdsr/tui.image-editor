@@ -195,7 +195,7 @@ export default {
                 iconObj[type] = path;
                 this.registerIcons(iconObj);
             },
-            registCustomIcon: (imgUrl) => { // imgUrl, file
+            registCustomIcon: imgUrl => {
                 this.addImageObject(imgUrl);
                 // const imagetracer = new Imagetracer();
                 // imagetracer.imageToSVG(

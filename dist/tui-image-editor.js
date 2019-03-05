@@ -11896,7 +11896,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	                iconObj[type] = path;
 	                _this2.registerIcons(iconObj);
 	            },
-	            registCustomIcon: function registCustomIcon() {// imgUrl, file
+	            registCustomIcon: function registCustomIcon(imgUrl) {
+	                _this2.addImageObject(imgUrl);
 	                // const imagetracer = new Imagetracer();
 	                // imagetracer.imageToSVG(
 	                //     imgUrl,
