@@ -6,11 +6,11 @@ export default ({biImage, commonStyle, headerStyle, loadButtonStyle, downloadBut
             </div>
             <div class="tui-image-editor-header-buttons">
                 <button style="${loadButtonStyle}">
-                    Load
+                    Upload Image
                     <input type="file" class="tui-image-editor-load-btn" />
                 </button>
                 <button class="tui-image-editor-download-btn" style="${downloadButtonStyle}">
-                    Download
+                    Download Image
                 </button>
                 <button class="tui-image-editor-finish-btn" style="${downloadButtonStyle}">
                     Finish
