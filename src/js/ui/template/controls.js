@@ -50,9 +50,6 @@ export default ({biImage, iconStyle: {normal, active}, loadButtonStyle, download
             <button class="tui-image-editor-download-btn" style="${downloadButtonStyle}">
                 Download image
             </button>
-            <button class="tui-image-editor-finish-btn" style="${downloadButtonStyle}">
-                Finish
-            </button>
         </div>
     </div>
 `);
